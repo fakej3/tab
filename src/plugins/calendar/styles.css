@@ -1,0 +1,47 @@
+.ws-calendar {
+  height: 100%;
+  padding: var(--ws-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-3);
+}
+
+.ws-calendar__heading {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ws-color-text-primary);
+}
+
+.ws-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  flex: 1;
+}
+
+.ws-calendar__weekday {
+  font-size: 0.65rem;
+  text-align: center;
+  color: var(--ws-color-text-tertiary);
+  padding-bottom: var(--ws-space-1);
+}
+
+.ws-calendar__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--ws-color-text-secondary);
+  border-radius: var(--ws-radius-sm);
+  aspect-ratio: 1;
+}
+
+.ws-calendar__day.is-today {
+  background: var(--ws-color-accent);
+  color: var(--ws-color-accent-contrast);
+  font-weight: 600;
+}
+
+.ws-calendar__day.is-empty {
+  visibility: hidden;
+}

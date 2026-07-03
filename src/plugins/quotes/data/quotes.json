@@ -1,0 +1,22 @@
+[
+  { "id": "q1", "text": "Simplicity is the ultimate sophistication.", "author": "Leonardo da Vinci" },
+  { "id": "q2", "text": "The details are not the details. They make the design.", "author": "Charles Eames" },
+  { "id": "q3", "text": "Have nothing in your house that you do not know to be useful, or believe to be beautiful.", "author": "William Morris" },
+  { "id": "q4", "text": "Less, but better.", "author": "Dieter Rams" },
+  { "id": "q5", "text": "Good design is as little design as possible.", "author": "Dieter Rams" },
+  { "id": "q6", "text": "Design is not just what it looks like and feels like. Design is how it works.", "author": "Steve Jobs" },
+  { "id": "q7", "text": "Whatever you do, do it well.", "author": "Walt Disney" },
+  { "id": "q8", "text": "The pursuit of quality, if genuine, is always inspired by love.", "author": "Robert M. Pirsig" },
+  { "id": "q9", "text": "It always seems impossible until it's done.", "author": "Nelson Mandela" },
+  { "id": "q10", "text": "Make it simple, but significant.", "author": "Don Draper" },
+  { "id": "q11", "text": "Quality is not an act, it is a habit.", "author": "Aristotle" },
+  { "id": "q12", "text": "Everything should be made as simple as possible, but not simpler.", "author": "Albert Einstein" },
+  { "id": "q13", "text": "The best way to predict the future is to invent it.", "author": "Alan Kay" },
+  { "id": "q14", "text": "Focus is a matter of deciding what things you're not going to do.", "author": "John Carmack" },
+  { "id": "q15", "text": "Absorb what is useful, discard what is not, add what is uniquely your own.", "author": "Bruce Lee" },
+  { "id": "q16", "text": "Slow is smooth, and smooth is fast.", "author": "Navy SEAL adage" },
+  { "id": "q17", "text": "You are what you do repeatedly.", "author": "Will Durant" },
+  { "id": "q18", "text": "Clarity is the counter to anxiety.", "author": "Marie Forleo" },
+  { "id": "q19", "text": "A room without books is like a body without a soul.", "author": "Cicero" },
+  { "id": "q20", "text": "Do the work. It's the only path there is.", "author": "Steven Pressfield" }
+]

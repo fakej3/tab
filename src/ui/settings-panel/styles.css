@@ -1,0 +1,271 @@
+.ws-settings-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ws-z-panel);
+  background: rgb(0 0 0 / 0.28);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--ws-duration-base) var(--ws-ease-standard);
+}
+
+.ws-settings-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ws-settings-panel {
+  width: min(560px, 100%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+  border-left: 1px solid var(--ws-surface-border-color);
+  background: color-mix(in srgb, var(--ws-color-background) 94%, var(--ws-color-text-primary) 6%);
+  backdrop-filter: blur(var(--ws-glass-blur));
+  -webkit-backdrop-filter: blur(var(--ws-glass-blur));
+  box-shadow: var(--ws-shadow-soft);
+}
+
+.ws-settings-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ws-space-5) var(--ws-space-5) var(--ws-space-3);
+}
+
+.ws-settings-panel__header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.ws-settings-panel__body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 168px 1fr;
+  min-height: 0;
+}
+
+.ws-settings-panel__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--ws-space-2) var(--ws-space-3);
+  overflow-y: auto;
+  border-right: 1px solid var(--ws-surface-border-color);
+}
+
+.ws-settings-panel__nav-item {
+  text-align: left;
+  padding: var(--ws-space-2) var(--ws-space-3);
+  border-radius: var(--ws-radius-sm);
+  font-size: 0.85rem;
+  color: var(--ws-color-text-secondary);
+}
+
+.ws-settings-panel__nav-item:hover {
+  background: color-mix(in srgb, var(--ws-color-text-primary) 6%, transparent);
+}
+
+.ws-settings-panel__nav-item.is-active {
+  background: color-mix(in srgb, var(--ws-color-accent) 18%, transparent);
+  color: var(--ws-color-accent);
+}
+
+.ws-settings-panel__content {
+  padding: var(--ws-space-4) var(--ws-space-5);
+  overflow-y: auto;
+}
+
+.ws-settings-panel__section-heading h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.ws-settings-panel__section-heading p {
+  font-size: 0.78rem;
+  color: var(--ws-color-text-tertiary);
+  margin-bottom: var(--ws-space-4);
+}
+
+.ws-field {
+  padding: var(--ws-space-3) 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ws-color-text-primary) 6%, transparent);
+}
+
+.ws-field:last-child {
+  border-bottom: none;
+}
+
+.ws-field__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--ws-space-2);
+}
+
+.ws-field__label {
+  font-size: 0.85rem;
+  color: var(--ws-color-text-primary);
+}
+
+.ws-field__value {
+  font-size: 0.75rem;
+  color: var(--ws-color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ws-field__description {
+  margin-top: var(--ws-space-1);
+  font-size: 0.72rem;
+  color: var(--ws-color-text-tertiary);
+}
+
+/* Controls */
+.ws-switch {
+  position: relative;
+  display: inline-flex;
+  width: 38px;
+  height: 22px;
+}
+
+.ws-switch__input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ws-switch__track {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--ws-radius-pill);
+  background: color-mix(in srgb, var(--ws-color-text-primary) 18%, transparent);
+  transition: background var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-switch__track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  transition: transform var(--ws-duration-fast) var(--ws-ease-spring);
+}
+
+.ws-switch__input:checked + .ws-switch__track {
+  background: var(--ws-color-accent);
+}
+
+.ws-switch__input:checked + .ws-switch__track::after {
+  transform: translateX(16px);
+}
+
+.ws-range {
+  width: 100%;
+  accent-color: var(--ws-color-accent);
+}
+
+.ws-select,
+.ws-text-input {
+  width: 100%;
+  padding: var(--ws-space-2) var(--ws-space-3);
+  border-radius: var(--ws-radius-sm);
+  border: 1px solid var(--ws-surface-border-color);
+  background: color-mix(in srgb, var(--ws-color-text-primary) 4%, transparent);
+  color: var(--ws-color-text-primary);
+  font-size: 0.85rem;
+}
+
+.ws-color {
+  width: 100%;
+  height: 34px;
+  border-radius: var(--ws-radius-sm);
+  border: 1px solid var(--ws-surface-border-color);
+  background: transparent;
+  padding: 2px;
+}
+
+.ws-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ws-space-2);
+}
+
+.ws-chip {
+  padding: 6px 14px;
+  border-radius: var(--ws-radius-pill);
+  font-size: 0.78rem;
+  border: 1px solid var(--ws-surface-border-color);
+  color: var(--ws-color-text-secondary);
+}
+
+.ws-chip.is-active {
+  background: var(--ws-color-accent);
+  color: var(--ws-color-accent-contrast);
+  border-color: transparent;
+}
+
+.ws-btn {
+  padding: 8px 14px;
+  border-radius: var(--ws-radius-sm);
+  font-size: 0.8rem;
+  border: 1px solid var(--ws-surface-border-color);
+  color: var(--ws-color-text-primary);
+}
+
+.ws-btn:hover {
+  background: color-mix(in srgb, var(--ws-color-text-primary) 6%, transparent);
+}
+
+.ws-btn--danger {
+  color: var(--ws-color-danger);
+  border-color: color-mix(in srgb, var(--ws-color-danger) 40%, transparent);
+}
+
+/* Wallpaper gallery */
+.ws-wallpaper-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--ws-space-2);
+}
+
+.ws-wallpaper-gallery__upload,
+.ws-wallpaper-gallery__tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--ws-radius-sm);
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--ws-surface-border-color);
+  font-size: 0.7rem;
+  color: var(--ws-color-text-tertiary);
+}
+
+.ws-wallpaper-gallery__tile.is-active {
+  outline: 2px solid var(--ws-color-accent);
+  outline-offset: 2px;
+}
+
+.ws-wallpaper-gallery__remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 0.6);
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+}

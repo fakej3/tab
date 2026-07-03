@@ -1,0 +1,76 @@
+html {
+  font-family: var(--ws-font-family);
+  font-size: var(--ws-font-size-base);
+  letter-spacing: var(--ws-letter-spacing-base);
+}
+
+body {
+  background: var(--ws-color-background);
+  color: var(--ws-color-text-primary);
+}
+
+/* Shared glass-surface utility every widget/panel opts into via this class. */
+.ws-glass {
+  background: var(--ws-surface-fill);
+  border: 1px solid var(--ws-surface-border-color);
+  border-radius: var(--ws-radius-base);
+  backdrop-filter: blur(var(--ws-glass-blur));
+  -webkit-backdrop-filter: blur(var(--ws-glass-blur));
+  box-shadow: var(--ws-shadow-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ws-color-accent);
+  outline-offset: 2px;
+  border-radius: var(--ws-radius-sm);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--ws-color-accent) 55%, transparent);
+  color: var(--ws-color-accent-contrast);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ws-color-text-primary) 20%, transparent);
+  border-radius: var(--ws-radius-pill);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.ws-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link — first focusable element for keyboard/screen-reader users. */
+.ws-skip-link {
+  position: fixed;
+  top: -100%;
+  left: var(--ws-space-4);
+  z-index: var(--ws-z-toast);
+  padding: var(--ws-space-2) var(--ws-space-4);
+  background: var(--ws-color-accent);
+  color: var(--ws-color-accent-contrast);
+  border-radius: var(--ws-radius-sm);
+  transition: top var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-skip-link:focus {
+  top: var(--ws-space-4);
+}

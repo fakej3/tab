@@ -1,0 +1,79 @@
+.ws-quotes {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--ws-space-2);
+  padding: var(--ws-space-5);
+  position: relative;
+}
+
+.ws-quotes__text {
+  font-size: 1.15rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--ws-color-text-primary);
+}
+
+.ws-quotes__author {
+  font-style: normal;
+  font-size: 0.85rem;
+  color: var(--ws-color-text-secondary);
+}
+
+.ws-quotes__actions {
+  position: absolute;
+  top: var(--ws-space-3);
+  right: var(--ws-space-3);
+  display: flex;
+  gap: var(--ws-space-1);
+  opacity: 0;
+  transition: opacity var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-quotes:hover .ws-quotes__actions {
+  opacity: 1;
+}
+
+.ws-quotes__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--ws-radius-pill);
+  color: var(--ws-color-text-tertiary);
+  transition: color var(--ws-duration-fast) var(--ws-ease-standard), background var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-quotes__action:hover {
+  background: color-mix(in srgb, var(--ws-color-text-primary) 10%, transparent);
+  color: var(--ws-color-text-primary);
+}
+
+.ws-quotes__action.is-active {
+  color: var(--ws-color-danger);
+}
+
+.ws-quotes__add {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ws-space-1);
+  margin-top: var(--ws-space-2);
+}
+
+.ws-quotes__add-input,
+.ws-quotes__add-author {
+  background: transparent;
+  border: 1px solid var(--ws-surface-border-color);
+  border-radius: var(--ws-radius-sm);
+  padding: var(--ws-space-2);
+  font-size: 0.85rem;
+  color: var(--ws-color-text-primary);
+  outline: none;
+}
+
+.ws-quotes__add-input:focus,
+.ws-quotes__add-author:focus {
+  border-color: var(--ws-color-accent);
+}

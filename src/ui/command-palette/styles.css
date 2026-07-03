@@ -1,0 +1,77 @@
+.ws-palette-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ws-z-palette);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 14vh;
+  background: rgb(0 0 0 / 0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-palette-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ws-palette {
+  width: min(560px, 92vw);
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ws-palette__input-row {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-3);
+  padding: var(--ws-space-4) var(--ws-space-4);
+  border-bottom: 1px solid var(--ws-surface-border-color);
+  color: var(--ws-color-text-tertiary);
+}
+
+.ws-palette__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: var(--ws-color-text-primary);
+}
+
+.ws-palette__list {
+  overflow-y: auto;
+  padding: var(--ws-space-2);
+}
+
+.ws-palette__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ws-space-3);
+  border-radius: var(--ws-radius-sm);
+  color: var(--ws-color-text-secondary);
+  font-size: 0.88rem;
+}
+
+.ws-palette__item.is-active {
+  background: color-mix(in srgb, var(--ws-color-accent) 16%, transparent);
+  color: var(--ws-color-text-primary);
+}
+
+.ws-palette__item-group {
+  font-size: 0.7rem;
+  color: var(--ws-color-text-tertiary);
+}
+
+.ws-palette__empty {
+  padding: var(--ws-space-4);
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ws-color-text-tertiary);
+}

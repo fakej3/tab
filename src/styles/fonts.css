@@ -1,0 +1,13 @@
+/**
+ * No fonts are bundled or fetched remotely (the extension CSP is
+ * `self`-only and premium feel shouldn't cost a network request on every
+ * new tab). The default stack in tokens.css uses each OS's native UI font,
+ * which already looks excellent and loads instantly.
+ *
+ * The Typography settings section lets users pick any font already
+ * installed on their system, and — where supported — import a local font
+ * file via the Local Font Access API. Custom `@font-face` rules for
+ * user-imported fonts are injected at runtime by the Typography plugin
+ * (as blob: URLs, permitted by `font-src 'self' data:` + the extension's
+ * own origin), not declared statically here.
+ */

@@ -1,0 +1,47 @@
+.ws-bookmarks {
+  height: 100%;
+  padding: var(--ws-space-3);
+  overflow: auto;
+}
+
+.ws-bookmarks__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ws-bookmarks__item {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-2);
+  padding: var(--ws-space-2) var(--ws-space-3);
+  border-radius: var(--ws-radius-sm);
+  color: var(--ws-color-text-secondary);
+  text-align: left;
+  transition: background var(--ws-duration-fast) var(--ws-ease-standard), color var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-bookmarks__item:hover {
+  background: color-mix(in srgb, var(--ws-color-text-primary) 8%, transparent);
+  color: var(--ws-color-text-primary);
+}
+
+.ws-bookmarks__favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.ws-bookmarks__label {
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ws-bookmarks__message {
+  padding: var(--ws-space-3);
+  font-size: 0.8rem;
+  color: var(--ws-color-text-tertiary);
+}

@@ -1,0 +1,192 @@
+.ws-shell {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+/* Wallpaper — always the backmost, full-bleed layer. */
+.ws-wallpaper {
+  position: absolute;
+  inset: 0;
+  z-index: var(--ws-z-wallpaper);
+  overflow: hidden;
+}
+
+.ws-wallpaper-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.ws-wallpaper-image {
+  position: absolute;
+  inset: -5%;
+  width: 110%;
+  height: 110%;
+  object-fit: cover;
+  transition: filter var(--ws-duration-slow) var(--ws-ease-standard);
+}
+
+.ws-wallpaper-tint {
+  position: absolute;
+  inset: 0;
+  transition: opacity var(--ws-duration-slow) var(--ws-ease-standard);
+}
+
+.ws-layout-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: var(--ws-z-layout);
+  padding: var(--ws-space-6);
+}
+
+.ws-widget {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform, width, height;
+  transition: box-shadow var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-widget.is-hidden {
+  opacity: 0.35;
+}
+
+.ws-widget__content {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.ws-widget__overlay {
+  position: absolute;
+  inset: -6px;
+  pointer-events: none;
+}
+
+.ws-layout-canvas.is-edit-mode .ws-widget {
+  outline: 1.5px dashed color-mix(in srgb, var(--ws-color-accent) 55%, transparent);
+  outline-offset: 4px;
+  border-radius: var(--ws-radius-base);
+}
+
+.ws-widget__drag-surface {
+  position: absolute;
+  inset: 6px;
+  pointer-events: auto;
+  cursor: grab;
+  border-radius: var(--ws-radius-base);
+}
+
+.ws-widget.is-locked .ws-widget__drag-surface {
+  cursor: not-allowed;
+}
+
+.ws-widget__drag-surface:active {
+  cursor: grabbing;
+}
+
+.ws-widget__controls {
+  position: absolute;
+  top: -4px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+  pointer-events: auto;
+}
+
+.ws-widget__btn {
+  width: 26px;
+  height: 26px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ws-color-background);
+  border: 1px solid var(--ws-surface-border-color);
+  border-radius: var(--ws-radius-pill);
+  box-shadow: var(--ws-shadow-soft);
+}
+
+.ws-widget__resize-handle {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  pointer-events: auto;
+  cursor: nwse-resize;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ws-color-accent) 70%, transparent);
+}
+
+.ws-widget.is-locked .ws-widget__resize-handle {
+  display: none;
+}
+
+/* Chrome: subtle corner controls, invisible until interacted with. */
+.ws-chrome {
+  position: fixed;
+  top: var(--ws-space-5);
+  right: var(--ws-space-5);
+  z-index: var(--ws-z-chrome);
+  display: flex;
+  gap: var(--ws-space-2);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--ws-duration-base) var(--ws-ease-standard), transform var(--ws-duration-base) var(--ws-ease-standard);
+}
+
+.ws-shell:hover .ws-chrome,
+.ws-chrome:focus-within {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ws-chrome__btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ws-radius-pill);
+  color: var(--ws-color-text-secondary);
+}
+
+.ws-chrome__btn:hover {
+  color: var(--ws-color-text-primary);
+}
+
+.ws-chrome__btn.is-active {
+  color: var(--ws-color-accent);
+}
+
+.ws-workspace-switcher {
+  position: fixed;
+  bottom: var(--ws-space-5);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--ws-z-chrome);
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  opacity: 0;
+  transition: opacity var(--ws-duration-base) var(--ws-ease-standard);
+}
+
+.ws-shell:hover .ws-workspace-switcher,
+.ws-workspace-switcher:focus-within {
+  opacity: 1;
+}
+
+.ws-workspace-switcher__item {
+  padding: 6px 14px;
+  border-radius: var(--ws-radius-pill);
+  font-size: 0.75rem;
+  color: var(--ws-color-text-secondary);
+  transition: background var(--ws-duration-fast) var(--ws-ease-standard), color var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-workspace-switcher__item.is-active {
+  background: var(--ws-color-accent);
+  color: var(--ws-color-accent-contrast);
+}

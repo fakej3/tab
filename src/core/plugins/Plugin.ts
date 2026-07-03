@@ -1,0 +1,73 @@
+import type { EventBus } from '@core/event-bus/EventBus';
+import type { WorkspaceEvents } from '@core/event-bus/events';
+import type { Command } from '@core/command-palette/CommandRegistry';
+import type { Logger } from '@core/utils/logger';
+import type { SettingsSection } from '@core/settings/SettingsSchema';
+import type { StorageService } from '@core/storage/StorageService';
+
+/** Scoped settings API handed to a plugin — reads/writes are pre-namespaced to `plugin.<id>`. */
+export interface PluginSettingsApi {
+  registerSection(section: Omit<SettingsSection, 'namespace'>): void;
+  get<T>(key: string): T;
+  set(key: string, value: unknown): void;
+  subscribe(listener: (values: Record<string, unknown>) => void): () => void;
+}
+
+/** Scoped command palette API — registered commands are auto-prefixed so plugin ids can never collide. */
+export interface PluginCommandsApi {
+  register(command: Command): () => void;
+}
+
+/** Everything a plugin is allowed to touch. No plugin ever imports another plugin or reaches into core internals. */
+export interface PluginContext {
+  id: string;
+  bus: EventBus<WorkspaceEvents>;
+  settings: PluginSettingsApi;
+  storage: StorageService;
+  commands: PluginCommandsApi;
+  logger: Logger;
+}
+
+/** Declares how a plugin's widget behaves in the LayoutEngine grid. Omit entirely for non-widget plugins. */
+export interface WidgetDescriptor {
+  defaultSize: { w: number; h: number };
+  minSize?: { w: number; h: number };
+  maxSize?: { w: number; h: number };
+  resizable?: boolean;
+}
+
+export interface Plugin {
+  id: string;
+  name: string;
+  version: string;
+  description: string;
+  /** Widget placement metadata; absent means the plugin has no on-canvas presence (e.g. a command-palette-only plugin). */
+  widget?: WidgetDescriptor;
+
+  /** Called once when the plugin is registered. Register settings schema and event listeners here. */
+  init(context: PluginContext): void | Promise<void>;
+  /** Render into the given container. Called whenever the layout engine places this plugin's widget. */
+  mount?(container: HTMLElement): void;
+  /** Remove DOM/listeners created in `mount`, but keep the plugin registered (e.g. widget hidden/resized away). */
+  unmount?(): void;
+  /** Full teardown — plugin is being unregistered entirely. */
+  destroy(): void;
+}
+
+export abstract class BasePlugin implements Plugin {
+  abstract id: string;
+  abstract name: string;
+  abstract version: string;
+  abstract description: string;
+  widget?: WidgetDescriptor;
+  unmount?(): void;
+  protected context!: PluginContext;
+
+  init(context: PluginContext): void | Promise<void> {
+    this.context = context;
+  }
+
+  destroy(): void {
+    this.unmount?.();
+  }
+}

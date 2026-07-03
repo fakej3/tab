@@ -1,0 +1,24 @@
+.ws-notes {
+  height: 100%;
+  padding: var(--ws-space-4);
+}
+
+.ws-notes__textarea {
+  width: 100%;
+  height: 100%;
+  resize: none;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--ws-color-text-primary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.ws-notes__textarea[data-font='mono'] {
+  font-family: var(--ws-font-family-mono);
+}
+
+.ws-notes__textarea::placeholder {
+  color: var(--ws-color-text-tertiary);
+}

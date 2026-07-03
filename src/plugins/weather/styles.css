@@ -1,0 +1,25 @@
+.ws-weather {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--ws-space-1);
+  padding: var(--ws-space-4);
+}
+
+.ws-weather__icon {
+  font-size: 1.8rem;
+  color: var(--ws-color-text-tertiary);
+}
+
+.ws-weather__message {
+  font-size: 0.8rem;
+  color: var(--ws-color-text-secondary);
+}
+
+.ws-weather__hint {
+  font-size: 0.7rem;
+  color: var(--ws-color-text-tertiary);
+}
