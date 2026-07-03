@@ -7,6 +7,7 @@ import { PluginManager } from '@core/plugins/PluginManager';
 import { SettingsManager } from '@core/settings/SettingsManager';
 import { storageService, type StorageService } from '@core/storage/StorageService';
 import { ThemeEngine } from '@core/theme/ThemeEngine';
+import { TypographyEngine } from '@core/typography/TypographyEngine';
 import { WallpaperEngine } from '@core/wallpaper/WallpaperEngine';
 import { createLogger } from '@core/utils/logger';
 import { registerBuiltinPlugins } from './registerBuiltinPlugins';
@@ -26,6 +27,7 @@ export class Application {
   readonly storage: StorageService = storageService;
   readonly settings: SettingsManager;
   readonly theme: ThemeEngine;
+  readonly typography: TypographyEngine;
   readonly animation: AnimationEngine;
   readonly wallpaper: WallpaperEngine;
   readonly layout: LayoutEngine;
@@ -35,6 +37,7 @@ export class Application {
   constructor() {
     this.settings = new SettingsManager(this.storage, this.bus);
     this.theme = new ThemeEngine(this.settings, this.bus);
+    this.typography = new TypographyEngine(this.settings, this.theme, this.bus);
     this.animation = new AnimationEngine(this.settings, this.theme, this.bus);
     this.wallpaper = new WallpaperEngine(this.settings, this.storage, this.bus);
     this.layout = new LayoutEngine(this.storage, this.bus);
@@ -45,6 +48,7 @@ export class Application {
   async bootstrap(): Promise<void> {
     await this.settings.load();
     this.theme.init();
+    this.typography.init();
     this.animation.init();
     await this.wallpaper.init();
     await this.layout.load();

@@ -11,8 +11,8 @@
   border: none;
   outline: none;
   color: var(--ws-color-text-primary);
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: var(--ws-text-sm);
+  line-height: var(--ws-line-height-base);
 }
 
 .ws-notes__textarea[data-font='mono'] {

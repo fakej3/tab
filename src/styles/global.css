@@ -2,27 +2,53 @@ html {
   font-family: var(--ws-font-family);
   font-size: var(--ws-font-size-base);
   letter-spacing: var(--ws-letter-spacing-base);
+  line-height: var(--ws-line-height-base);
 }
 
 body {
   background: var(--ws-color-background);
   color: var(--ws-color-text-primary);
+  /* Theme/typography changes crossfade instead of snapping — the whole
+     point of a live-preview settings panel is that it should feel like a
+     dissolve, not a flash. */
+  transition: background-color var(--ws-duration-slow) var(--ws-ease-standard), color var(--ws-duration-slow) var(--ws-ease-standard);
 }
 
 /* Shared glass-surface utility every widget/panel opts into via this class. */
 .ws-glass {
   background: var(--ws-surface-fill);
   border: 1px solid var(--ws-surface-border-color);
-  border-radius: var(--ws-radius-base);
-  backdrop-filter: blur(var(--ws-glass-blur));
-  -webkit-backdrop-filter: blur(var(--ws-glass-blur));
-  box-shadow: var(--ws-shadow-soft);
+  border-radius: var(--ws-radius-md);
+  backdrop-filter: blur(var(--ws-blur-md));
+  -webkit-backdrop-filter: blur(var(--ws-blur-md));
+  box-shadow: var(--ws-elevation-2);
+  transition:
+    background-color var(--ws-duration-slow) var(--ws-ease-standard),
+    border-color var(--ws-duration-slow) var(--ws-ease-standard),
+    box-shadow var(--ws-duration-base) var(--ws-ease-standard),
+    backdrop-filter var(--ws-duration-slow) var(--ws-ease-standard);
+}
+
+/* Display typography — the clock, and anything else meant to be the
+   headline moment of its widget. */
+.ws-display {
+  font-family: var(--ws-font-family-display);
+  font-weight: var(--ws-font-weight-display);
+  letter-spacing: var(--ws-letter-spacing-display);
+}
+
+/* Small caption/eyebrow text — dates, section headers, palette groups.
+   Respects the "uppercase labels" typography toggle globally instead of
+   each plugin deciding for itself. */
+.ws-label {
+  text-transform: var(--ws-text-transform-label);
+  letter-spacing: max(0.04em, var(--ws-letter-spacing-base));
 }
 
 :focus-visible {
   outline: 2px solid var(--ws-color-accent);
   outline-offset: 2px;
-  border-radius: var(--ws-radius-sm);
+  border-radius: var(--ws-radius-xs);
 }
 
 ::selection {
@@ -73,4 +99,86 @@ body {
 
 .ws-skip-link:focus {
   top: var(--ws-space-4);
+}
+
+/* ------------------------------------------------------------------ */
+/* State primitives — empty / loading / status. Every plugin that needs   */
+/* one of these uses the shared class instead of inventing its own.       */
+/* ------------------------------------------------------------------ */
+
+.ws-empty-state {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--ws-space-1);
+  padding: var(--ws-space-4);
+  color: var(--ws-color-text-tertiary);
+}
+
+.ws-empty-state__icon {
+  font-size: var(--ws-text-xl);
+  color: var(--ws-color-text-tertiary);
+  margin-bottom: var(--ws-space-1);
+  opacity: 0.8;
+}
+
+.ws-empty-state__title {
+  font-size: var(--ws-text-sm);
+  color: var(--ws-color-text-secondary);
+}
+
+.ws-empty-state__hint {
+  font-size: var(--ws-text-xs);
+  color: var(--ws-color-text-tertiary);
+}
+
+.ws-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ws-color-text-primary) 8%, transparent);
+  border-radius: var(--ws-radius-sm);
+}
+
+.ws-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--ws-color-text-primary) 12%, transparent), transparent);
+  animation: ws-shimmer-sweep 1.6s var(--ws-ease-standard) infinite;
+}
+
+.ws-status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ws-status-dot--success {
+  color: var(--ws-color-success);
+}
+
+.ws-status-dot--warning {
+  color: var(--ws-color-warning);
+}
+
+.ws-status-dot--danger {
+  color: var(--ws-color-danger);
+}
+
+@keyframes ws-shimmer-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-skeleton::after {
+    animation: none;
+  }
 }

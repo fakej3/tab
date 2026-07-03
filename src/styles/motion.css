@@ -1,0 +1,108 @@
+/**
+ * The motion language: a small, named set of interaction patterns that
+ * every hoverable/pressable surface in the app draws from, instead of each
+ * component inventing its own transition. Durations/easings always come
+ * from tokens.css (and therefore from AnimationEngine) so "animation
+ * speed" and "reduce motion" govern these too. One-shot entrance/exit
+ * motion (fade, scale, slide, spring...) is handled in JS by
+ * `core/animation/motion.ts` via the Web Animations API — this file is
+ * specifically the *continuous/hover-driven* half of the language.
+ */
+
+/* Hover lift — the default "this is interactive" cue for buttons, chips,
+   and list items. Subtle: a hairline of vertical movement, not a jump. */
+.ws-motion-hover-lift {
+  transition: transform var(--ws-duration-base) var(--ws-ease-standard), box-shadow var(--ws-duration-base) var(--ws-ease-standard),
+    background-color var(--ws-duration-fast) var(--ws-ease-standard), color var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-motion-hover-lift:hover {
+  transform: translateY(-1px);
+}
+
+/* Press — the default "this just got activated" cue. Combine with hover-lift. */
+.ws-motion-press {
+  transition: transform var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-motion-press:active {
+  transform: scale(0.96);
+}
+
+/* Soft scale — for cards/surfaces where a lift would look odd but the
+   surface should still acknowledge the cursor. */
+.ws-motion-soft-scale {
+  transition: transform var(--ws-duration-slow) var(--ws-ease-standard), box-shadow var(--ws-duration-slow) var(--ws-ease-standard);
+}
+
+.ws-motion-soft-scale:hover {
+  transform: scale(1.008);
+}
+
+/* Shimmer — a single light sweep on hover-enter, not a looping animation.
+   Used sparingly on glass list items (settings nav, palette results) to
+   suggest glass without being a gimmick. */
+.ws-motion-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.ws-motion-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, color-mix(in srgb, var(--ws-color-text-primary) 10%, transparent) 50%, transparent 70%);
+  background-size: 220% 100%;
+  background-position: 140% 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: background-position var(--ws-duration-slow) var(--ws-ease-standard), opacity var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-motion-shimmer:hover::after {
+  opacity: 1;
+  background-position: -40% 0;
+}
+
+/* Idle breathing — a slow, ambient pulse for "ready but inactive" states
+   (e.g. the music visualizer with nothing playing). Deliberately subtle:
+   scale never exceeds 3%, opacity never dips below 60%. */
+@keyframes ws-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+}
+
+.ws-motion-breathe {
+  animation: ws-breathe var(--ws-duration-ambient) var(--ws-ease-standard) infinite;
+}
+
+/* Glow-on-focus — used for the single most important control on screen
+   (the search bar). A soft ring, not a hard outline; :focus-visible still
+   gets the accessible outline separately. */
+.ws-motion-focus-glow {
+  transition: box-shadow var(--ws-duration-base) var(--ws-ease-standard), border-color var(--ws-duration-base) var(--ws-ease-standard);
+}
+
+.ws-motion-focus-glow:focus-within {
+  box-shadow: var(--ws-elevation-2), var(--ws-glow-accent);
+  border-color: color-mix(in srgb, var(--ws-color-accent) 45%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-motion-hover-lift:hover,
+  .ws-motion-press:active,
+  .ws-motion-soft-scale:hover {
+    transform: none;
+  }
+
+  .ws-motion-breathe {
+    animation: none;
+  }
+}

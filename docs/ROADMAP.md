@@ -3,14 +3,13 @@
 What's deliberately not built, and why — so it reads as scoped decisions,
 not gaps nobody noticed.
 
-## Typography settings section
+## Local/imported fonts
 
-Fonts are already fully tokenized (`--ws-font-family`, `--ws-font-size-base`,
-`--ws-letter-spacing-base`, `--ws-line-height-base` in `styles/tokens.css`),
-but there's no Settings UI for them yet and no Local Font Access API
-integration. Adding it is the standard "engine + SettingsSection" recipe in
-`docs/THEMING.md` — it wasn't skipped for architectural reasons, just
-sequencing.
+`TypographyEngine` (added in the design system pass) covers presets and
+manual overrides of size/tracking/line-height/weight, all system-font-based.
+Local Font Access API integration (letting a user pick an arbitrary
+installed font) is the natural next step — `docs/THEMING.md` covers the
+token recipe; this is additive, not a redesign.
 
 ## Multi-instance / duplicate widgets
 
@@ -69,10 +68,29 @@ fetch + a preset picker, not a new persistence mechanism.
 `CommandRegistry.search()` already does simple scored matching. Routing
 free text to actions/AI is additive on top of both, not a redesign.
 
+## Wallpaper brightness vs. theme contrast
+
+Theme presets set surface/text pairs that stay legible against *any*
+wallpaper by keeping glass opacity high enough that the surface color
+dominates the composite (this is what was broken — and fixed — in
+Daybreak: a dark glass surface paired with dark text, invisible once
+composited over the default dark wallpaper). The built-in presets are dark
+end-to-end or light end-to-end for exactly this reason. What's still
+unsolved: a *dark* theme with a user-chosen *bright* wallpaper and low
+glass opacity can still end up with reduced contrast, since text color
+doesn't adapt to what's actually behind a given widget. The real fix is
+the wallpaper-color-extraction-driven theming described above (auto-nudge
+the theme when the wallpaper changes) rather than per-widget contrast
+detection, which would be expensive and fragile.
+
 ## Accessibility
 
-Keyboard nav (Tab), focus-visible styling, a skip link, and
-`prefers-reduced-motion` are implemented. Full screen-reader pass (ARIA
-live regions for the rotating quote/clock, palette listbox roving
-`aria-activedescendant` instead of rebuilding the list on every keypress)
-is the next accessibility increment.
+Keyboard nav (Tab), focus-visible styling, a skip link, live-region
+announcements for search's inline calculator/conversion result, and
+`prefers-reduced-motion` (both the CSS blanket rule and JS-driven motion
+like wallpaper parallax and WAAPI transitions) are implemented. The command
+palette uses a real `combobox`/`listbox`/`aria-activedescendant` pattern.
+Not yet done: the recent-searches dropdown is plain focusable buttons
+rather than a full listbox pattern (deliberately — a half-implemented
+roving-focus listbox is worse than a simple one), and a full contrast
+audit against WCAG AA across every theme preset × wallpaper combination.

@@ -31,31 +31,47 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
     }
   }) as HTMLInputElement;
 
-  const emptyState = h('button', { class: 'ws-music__empty', type: 'button', onclick: () => fileInput.click() }, [
-    musicNoteIcon(),
+  const emptyIcon = musicNoteIcon();
+  emptyIcon.classList.add('ws-motion-breathe');
+  const emptyState = h('button', { class: 'ws-music__empty ws-motion-hover-lift', type: 'button', onclick: () => fileInput.click() }, [
+    emptyIcon,
     h('span', {}, ['Add music'])
   ]);
 
   const canvas = h('canvas', { class: 'ws-music__visualizer' }) as HTMLCanvasElement;
 
   const artwork = h('div', { class: 'ws-music__artwork' });
-  const title = h('div', { class: 'ws-music__title' });
-  const artist = h('div', { class: 'ws-music__artist' });
+  const title = h('div', { class: 'ws-music__title ws-music__fade' });
+  const artist = h('div', { class: 'ws-music__artist ws-music__fade' });
 
   const progressTrack = h('div', { class: 'ws-music__progress-track' });
   const progressFill = h('div', { class: 'ws-music__progress-fill' });
-  progressTrack.append(progressFill);
+  const progressKnob = h('div', { class: 'ws-music__progress-knob' });
+  progressTrack.append(progressFill, progressKnob);
   progressTrack.addEventListener('click', (event) => {
     const rect = progressTrack.getBoundingClientRect();
     callbacks.onSeek((event.clientX - rect.left) / rect.width);
   });
 
   const playIcon = () => (playPauseBtn.dataset.playing === 'true' ? pauseSvg() : playSvg());
-  const playPauseBtn = h('button', { class: 'ws-music__play', type: 'button', 'aria-label': 'Play/Pause', onclick: () => callbacks.onPlayPause() });
+  const playPauseBtn = h('button', {
+    class: 'ws-music__play ws-motion-press',
+    type: 'button',
+    'aria-label': 'Play/Pause',
+    onclick: () => callbacks.onPlayPause()
+  });
   playPauseBtn.append(playSvg());
 
-  const prevBtn = h('button', { class: 'ws-music__skip', type: 'button', 'aria-label': 'Previous', onclick: () => callbacks.onSkip(-1) }, [skipSvg(true)]);
-  const nextBtn = h('button', { class: 'ws-music__skip', type: 'button', 'aria-label': 'Next', onclick: () => callbacks.onSkip(1) }, [skipSvg(false)]);
+  const prevBtn = h(
+    'button',
+    { class: 'ws-music__skip ws-motion-press', type: 'button', 'aria-label': 'Previous', onclick: () => callbacks.onSkip(-1) },
+    [skipSvg(true)]
+  );
+  const nextBtn = h(
+    'button',
+    { class: 'ws-music__skip ws-motion-press', type: 'button', 'aria-label': 'Next', onclick: () => callbacks.onSkip(1) },
+    [skipSvg(false)]
+  );
 
   const volumeSlider = h('input', {
     class: 'ws-music__volume',
@@ -63,6 +79,7 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
     min: '0',
     max: '1',
     step: '0.01',
+    'aria-label': 'Volume',
     oninput: (event: Event) => callbacks.onVolumeChange(Number((event.target as HTMLInputElement).value))
   }) as HTMLInputElement;
 
@@ -72,6 +89,8 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
 
   const root = h('div', { class: 'ws-music' }, [emptyState, player, fileInput]);
 
+  let lastTrackId: string | null = null;
+
   function showEmpty(): void {
     emptyState.hidden = false;
     player.hidden = true;
@@ -80,18 +99,37 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
   function showPlayer(track: Track): void {
     emptyState.hidden = true;
     player.hidden = false;
-    title.textContent = track.title;
-    artist.textContent = track.artist;
     artwork.style.backgroundImage = track.artworkUrl ? `url(${track.artworkUrl})` : 'none';
+
+    const changed = track.id !== lastTrackId;
+    lastTrackId = track.id;
+    const paint = () => {
+      title.textContent = track.title;
+      artist.textContent = track.artist;
+    };
+    if (changed) {
+      title.classList.add('is-fading');
+      artist.classList.add('is-fading');
+      window.setTimeout(() => {
+        paint();
+        title.classList.remove('is-fading');
+        artist.classList.remove('is-fading');
+      }, 160);
+    } else {
+      paint();
+    }
   }
 
   function setPlaying(playing: boolean): void {
     playPauseBtn.dataset.playing = String(playing);
     playPauseBtn.replaceChildren(playIcon());
+    player.classList.toggle('is-playing', playing);
   }
 
   function setProgress(currentTime: number, duration: number): void {
-    progressFill.style.width = duration > 0 ? `${(currentTime / duration) * 100}%` : '0%';
+    const ratio = duration > 0 ? currentTime / duration : 0;
+    progressFill.style.width = `${ratio * 100}%`;
+    progressKnob.style.left = `${ratio * 100}%`;
   }
 
   function setVolumeSlider(volume: number): void {
@@ -121,4 +159,5 @@ const playSvg = () => svg([{ d: 'M8 5v14l11-7z' }]);
 const pauseSvg = () => svg([{ d: 'M6 5h4v14H6zM14 5h4v14h-4z' }]);
 const skipSvg = (back: boolean) =>
   svg([{ d: back ? 'M6 6h2v12H6zM20 6L10 12l10 6z' : 'M16 6h2v12h-2zM4 6l10 6-10 6z' }]);
-const musicNoteIcon = () => svg([{ d: 'M9 18V5l12-2v13' }, { tag: 'circle', attrs: { cx: '6', cy: '18', r: '3' } }, { tag: 'circle', attrs: { cx: '18', cy: '16', r: '3' } }]);
+const musicNoteIcon = () =>
+  svg([{ d: 'M9 18V5l12-2v13' }, { tag: 'circle', attrs: { cx: '6', cy: '18', r: '3' } }, { tag: 'circle', attrs: { cx: '18', cy: '16', r: '3' } }]);

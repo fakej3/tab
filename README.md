@@ -34,14 +34,23 @@ select the `dist/` folder.
 
 ## What's actually implemented
 
-Fully working: Wallpaper (color/gradient/image + blur/tint), Theme (5
-presets + full manual override), Typography/Motion tokens, a draggable/
-resizable/lockable/hideable multi-workspace layout grid, a Settings overlay
-that renders every plugin's settings generically, a ⌘K command palette,
-Search (8 providers + shortcut routing), Clock, Quotes (local/favorites/
-custom), Notes, Calendar, Bookmarks, and Music (local files, Media Session,
-a configurable canvas visualizer).
+Fully working: a complete design token system (color/glass/elevation,
+typography, spacing, motion — see `docs/THEMING.md`), Wallpaper
+(color/gradient/image with crossfade transitions, load-in, subtle cursor
+parallax, dynamic dimming behind overlays), Theme (5 presets + full manual
+override), Typography (7 presets — Minimal/Editorial/Modern/Elegant/Swiss/
+Classic/Monospace — + manual override), a shared motion language (hover
+lift, press, shimmer, ambient breathing) applied consistently across every
+interactive surface, a draggable/resizable/lockable/hideable multi-workspace
+layout grid, a searchable Settings overlay that renders every plugin's
+settings generically, a ⌘K command palette, Search (8 providers + shortcut
+routing + an inline calculator + unit conversion + recent searches), Clock,
+Quotes (local/favorites/custom), Notes, Calendar, Bookmarks, and Music
+(local files, Media Session, 5 configurable canvas visualizer styles
+including a signature "breathing" waveform).
 
 Intentionally scaffolded, not faked: Weather and AI register real settings
-and a real widget slot but don't call a live provider — see their READMEs
-for exactly what wiring one up requires and why it wasn't done silently.
+and a real widget slot (hidden by default until configured, so they don't
+greet new users with an apology card) but don't call a live provider — see
+their READMEs for exactly what wiring one up requires and why it wasn't
+done silently.

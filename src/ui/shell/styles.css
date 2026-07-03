@@ -4,26 +4,44 @@
   width: 100%;
 }
 
-/* Wallpaper — always the backmost, full-bleed layer. */
+/* Wallpaper — always the backmost, full-bleed layer. Two stacked layers so
+   WallpaperEngine can crossfade between them instead of snapping. */
 .ws-wallpaper {
   position: absolute;
   inset: 0;
   z-index: var(--ws-z-wallpaper);
   overflow: hidden;
+  background: var(--ws-color-background);
 }
 
 .ws-wallpaper-layer {
   position: absolute;
   inset: 0;
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity var(--ws-duration-slow) var(--ws-ease-standard);
+}
+
+.ws-wallpaper-layer.is-visible {
+  opacity: 1;
+}
+
+/* Dims and softens the wallpaper very slightly while an overlay (palette,
+   settings) has focus — a cheap, effective way to direct attention without
+   touching the overlay's own styling. */
+.ws-wallpaper.is-dimmed .ws-wallpaper-layer {
+  filter: brightness(0.82) saturate(0.92);
 }
 
 .ws-wallpaper-image {
   position: absolute;
-  inset: -5%;
-  width: 110%;
-  height: 110%;
+  inset: -6%;
+  width: 112%;
+  height: 112%;
   object-fit: cover;
-  transition: filter var(--ws-duration-slow) var(--ws-ease-standard);
+  transform: translate3d(var(--ws-parallax-x, 0px), var(--ws-parallax-y, 0px), 0);
+  transition: filter var(--ws-duration-slow) var(--ws-ease-standard), transform 700ms var(--ws-ease-standard);
+  will-change: transform;
 }
 
 .ws-wallpaper-tint {
@@ -44,17 +62,47 @@
   top: 0;
   left: 0;
   will-change: transform, width, height;
-  transition: box-shadow var(--ws-duration-fast) var(--ws-ease-standard);
+  /* Idle moves (e.g. an import, or a rejected drag snapping back) animate
+     smoothly; an active drag disables this so the widget tracks the
+     pointer 1:1 with zero lag. */
+  transition: transform var(--ws-duration-base) var(--ws-ease-standard), width var(--ws-duration-base) var(--ws-ease-standard),
+    height var(--ws-duration-base) var(--ws-ease-standard);
 }
 
 .ws-widget.is-hidden {
   opacity: 0.35;
 }
 
+.ws-widget.is-dragging {
+  z-index: 5;
+  transition: none;
+}
+
+/* Any widget with focus (e.g. the search bar showing a suggestions
+   dropdown that overflows its own bounds) paints above its siblings —
+   generic, not specific to any one plugin. */
+.ws-widget:focus-within {
+  z-index: 6;
+}
+
 .ws-widget__content {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  box-shadow: var(--ws-elevation-1);
+  transition: box-shadow var(--ws-duration-slow) var(--ws-ease-standard), transform var(--ws-duration-slow) var(--ws-ease-standard);
+}
+
+.ws-widget__content:hover {
+  box-shadow: var(--ws-elevation-2);
+}
+
+.ws-widget.is-dragging .ws-widget__content {
+  box-shadow: var(--ws-elevation-4);
+}
+
+.ws-widget__content--overflow-visible {
+  overflow: visible;
 }
 
 .ws-widget__overlay {
@@ -66,7 +114,7 @@
 .ws-layout-canvas.is-edit-mode .ws-widget {
   outline: 1.5px dashed color-mix(in srgb, var(--ws-color-accent) 55%, transparent);
   outline-offset: 4px;
-  border-radius: var(--ws-radius-base);
+  border-radius: var(--ws-radius-md);
 }
 
 .ws-widget__drag-surface {
@@ -74,7 +122,7 @@
   inset: 6px;
   pointer-events: auto;
   cursor: grab;
-  border-radius: var(--ws-radius-base);
+  border-radius: var(--ws-radius-md);
 }
 
 .ws-widget.is-locked .ws-widget__drag-surface {
@@ -104,7 +152,13 @@
   background: var(--ws-color-background);
   border: 1px solid var(--ws-surface-border-color);
   border-radius: var(--ws-radius-pill);
-  box-shadow: var(--ws-shadow-soft);
+  box-shadow: var(--ws-elevation-1);
+  color: var(--ws-color-text-secondary);
+}
+
+.ws-widget__btn:hover {
+  color: var(--ws-color-text-primary);
+  box-shadow: var(--ws-elevation-2);
 }
 
 .ws-widget__resize-handle {
@@ -117,6 +171,12 @@
   cursor: nwse-resize;
   border-radius: 4px;
   background: color-mix(in srgb, var(--ws-color-accent) 70%, transparent);
+  transition: transform var(--ws-duration-fast) var(--ws-ease-standard), background var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-widget__resize-handle:hover {
+  transform: scale(1.2);
+  background: var(--ws-color-accent);
 }
 
 .ws-widget.is-locked .ws-widget__resize-handle {
@@ -143,8 +203,8 @@
 }
 
 .ws-chrome__btn {
-  width: 38px;
-  height: 38px;
+  width: var(--ws-control-height-md);
+  height: var(--ws-control-height-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -154,10 +214,12 @@
 
 .ws-chrome__btn:hover {
   color: var(--ws-color-text-primary);
+  background: color-mix(in srgb, var(--ws-color-text-primary) 10%, transparent);
 }
 
 .ws-chrome__btn.is-active {
   color: var(--ws-color-accent);
+  background: color-mix(in srgb, var(--ws-color-accent) 16%, transparent);
 }
 
 .ws-workspace-switcher {
@@ -181,9 +243,13 @@
 .ws-workspace-switcher__item {
   padding: 6px 14px;
   border-radius: var(--ws-radius-pill);
-  font-size: 0.75rem;
+  font-size: var(--ws-text-xs);
   color: var(--ws-color-text-secondary);
   transition: background var(--ws-duration-fast) var(--ws-ease-standard), color var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-workspace-switcher__item:hover {
+  color: var(--ws-color-text-primary);
 }
 
 .ws-workspace-switcher__item.is-active {

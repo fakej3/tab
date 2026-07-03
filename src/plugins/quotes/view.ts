@@ -12,12 +12,17 @@ export interface QuoteView {
 }
 
 export function createQuoteView(callbacks: QuoteViewCallbacks): QuoteView {
-  const textEl = h('p', { class: 'ws-quotes__text' });
-  const authorEl = h('cite', { class: 'ws-quotes__author' });
+  const textEl = h('p', { class: 'ws-quotes__text ws-quotes__fade' });
+  const authorEl = h('cite', { class: 'ws-quotes__author ws-quotes__fade' });
 
   const favoriteBtn = h(
     'button',
-    { class: 'ws-quotes__action', type: 'button', 'aria-label': 'Favorite this quote', onclick: () => callbacks.onToggleFavorite() },
+    {
+      class: 'ws-quotes__action ws-motion-hover-lift ws-motion-press',
+      type: 'button',
+      'aria-label': 'Favorite this quote',
+      onclick: () => callbacks.onToggleFavorite()
+    },
     [heartIcon()]
   );
 
@@ -37,22 +42,50 @@ export function createQuoteView(callbacks: QuoteViewCallbacks): QuoteView {
 
   const addBtn = h(
     'button',
-    { class: 'ws-quotes__action', type: 'button', 'aria-label': 'Add your own quote', onclick: () => {
-      addForm.hidden = !addForm.hidden;
-      if (!addForm.hidden) addInput.focus();
-    } },
+    {
+      class: 'ws-quotes__action ws-motion-hover-lift ws-motion-press',
+      type: 'button',
+      'aria-label': 'Add your own quote',
+      onclick: () => {
+        addForm.hidden = !addForm.hidden;
+        if (!addForm.hidden) addInput.focus();
+      }
+    },
     ['+']
   );
 
   const actions = h('div', { class: 'ws-quotes__actions' }, [favoriteBtn, addBtn]);
   const root = h('div', { class: 'ws-quotes' }, [textEl, authorEl, actions, addForm]);
 
+  let lastRenderedId: string | null = null;
+  let firstRender = true;
+
   function render(quote: Quote | null, isFavorite: boolean, showAuthor: boolean): void {
-    textEl.textContent = quote ? `“${quote.text}”` : 'Add your first quote with the + button.';
-    authorEl.textContent = quote && showAuthor ? `— ${quote.author}` : '';
-    authorEl.hidden = !quote || !showAuthor;
-    favoriteBtn.classList.toggle('is-active', isFavorite);
-    favoriteBtn.hidden = !quote;
+    const changed = quote?.id !== lastRenderedId;
+    lastRenderedId = quote?.id ?? null;
+
+    const paint = () => {
+      textEl.textContent = quote ? `“${quote.text}”` : 'Add your first quote with the + button.';
+      authorEl.textContent = quote && showAuthor ? `— ${quote.author}` : '';
+      authorEl.hidden = !quote || !showAuthor;
+      favoriteBtn.classList.toggle('is-active', isFavorite);
+      favoriteBtn.hidden = !quote;
+    };
+
+    // Crossfade to the new quote rather than snapping — but never on the
+    // very first paint, which should just appear with the widget.
+    if (changed && !firstRender) {
+      textEl.classList.add('is-fading');
+      authorEl.classList.add('is-fading');
+      window.setTimeout(() => {
+        paint();
+        textEl.classList.remove('is-fading');
+        authorEl.classList.remove('is-fading');
+      }, 180);
+    } else {
+      paint();
+    }
+    firstRender = false;
   }
 
   return { root, render };

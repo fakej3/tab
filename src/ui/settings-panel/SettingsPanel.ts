@@ -11,6 +11,7 @@ interface PanelSection {
   id: string;
   title: string;
   description?: string;
+  keywords?: string[];
   render: () => HTMLElement;
 }
 
@@ -28,17 +29,36 @@ export class SettingsPanel {
   private content: HTMLElement;
   private activeSectionId = 'general';
   private isOpen = false;
+  private searchQuery = '';
+  private searchInput: HTMLInputElement;
 
   constructor(private app: Application) {
     this.content = h('div', { class: 'ws-settings-panel__content' });
     this.sidebar = h('nav', { class: 'ws-settings-panel__sidebar' });
+    this.searchInput = h('input', {
+      class: 'ws-settings-panel__search-input',
+      type: 'text',
+      placeholder: 'Search settings…',
+      'aria-label': 'Search settings',
+      autocomplete: 'off',
+      oninput: (event: Event) => {
+        this.searchQuery = (event.target as HTMLInputElement).value.trim().toLowerCase();
+        this.renderSidebar();
+      }
+    }) as HTMLInputElement;
 
-    const closeBtn = h('button', { class: 'ws-chrome__btn', type: 'button', 'aria-label': 'Close settings', onclick: () => this.close() }, [icons.close()]);
+    const closeBtn = h(
+      'button',
+      { class: 'ws-chrome__btn ws-motion-press', type: 'button', 'aria-label': 'Close settings', onclick: () => this.close() },
+      [icons.close()]
+    );
     const header = h('div', { class: 'ws-settings-panel__header' }, [h('h2', {}, ['Settings']), closeBtn]);
+    const searchWrapper = h('div', { class: 'ws-settings-panel__search' }, [this.searchInput]);
+    const sidebarColumn = h('div', { class: 'ws-settings-panel__sidebar-column' }, [searchWrapper, this.sidebar]);
 
     const panel = h('div', { class: 'ws-settings-panel', role: 'dialog', 'aria-label': 'Settings' }, [
       header,
-      h('div', { class: 'ws-settings-panel__body' }, [this.sidebar, this.content])
+      h('div', { class: 'ws-settings-panel__body' }, [sidebarColumn, this.content])
     ]);
 
     this.backdrop = h('div', { class: 'ws-settings-backdrop', onclick: () => this.close() }, [panel]);
@@ -74,10 +94,14 @@ export class SettingsPanel {
   open(section?: string): void {
     this.isOpen = true;
     this.activeSectionId = section ?? this.activeSectionId;
-    this.root.classList.add('is-open');
+    this.searchQuery = '';
+    this.searchInput.value = '';
     this.renderSidebar();
     this.renderContent();
-    this.app.animation.animate(this.root.firstElementChild!, 'slide-up', { duration: 'base', easing: 'emphasized' });
+    // A pure CSS transition (see styles.css) rather than a one-shot WAAPI
+    // call — keeps this overlay's entrance driven by the same `.is-open`
+    // class pattern as the command palette instead of a second mechanism.
+    this.root.classList.add('is-open');
   }
 
   close(): void {
@@ -95,6 +119,7 @@ export class SettingsPanel {
     const general: PanelSection = {
       id: 'general',
       title: 'General',
+      keywords: ['workspace', 'export', 'import', 'reset', 'layout'],
       render: () => renderGeneralSection(this.app)
     };
 
@@ -102,10 +127,19 @@ export class SettingsPanel {
       id: section.namespace,
       title: section.title,
       description: section.description,
+      keywords: section.fields.map((field) => field.label),
       render: () => this.renderSchemaSection(section)
     }));
 
     return [general, ...schemaSections];
+  }
+
+  private getMatchingSections(): PanelSection[] {
+    if (!this.searchQuery) return this.getPanelSections();
+    return this.getPanelSections().filter((section) => {
+      const haystack = [section.title, section.description ?? '', ...(section.keywords ?? [])].join(' ').toLowerCase();
+      return haystack.includes(this.searchQuery);
+    });
   }
 
   private renderSchemaSection(section: SettingsSection): HTMLElement {
@@ -125,11 +159,18 @@ export class SettingsPanel {
 
   private renderSidebar(): void {
     clearChildren(this.sidebar);
-    for (const section of this.getPanelSections()) {
+    const matches = this.getMatchingSections();
+
+    if (matches.length === 0) {
+      this.sidebar.append(h('p', { class: 'ws-settings-panel__no-matches' }, ['No matches']));
+      return;
+    }
+
+    for (const section of matches) {
       const btn = h(
         'button',
         {
-          class: `ws-settings-panel__nav-item${section.id === this.activeSectionId ? ' is-active' : ''}`,
+          class: `ws-settings-panel__nav-item ws-motion-shimmer${section.id === this.activeSectionId ? ' is-active' : ''}`,
           type: 'button',
           onclick: () => {
             this.activeSectionId = section.id;
@@ -150,6 +191,7 @@ export class SettingsPanel {
       h('h3', {}, [section.title]),
       section.description ? h('p', {}, [section.description]) : null
     ]);
-    this.content.append(heading, section.render());
+    const inner = h('div', { class: 'ws-settings-panel__content-inner' }, [heading, section.render()]);
+    this.content.append(inner);
   }
 }

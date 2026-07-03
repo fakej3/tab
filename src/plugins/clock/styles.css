@@ -10,27 +10,42 @@
 }
 
 .ws-clock__time {
-  font-size: calc(3.4rem * var(--ws-clock-scale, 1));
-  font-weight: 200;
+  font-family: var(--ws-font-family-display);
+  font-size: calc(var(--ws-text-5xl) * var(--ws-clock-scale, 1));
+  font-weight: var(--ws-font-weight-display);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--ws-letter-spacing-display);
   color: var(--ws-color-text-primary);
   font-variant-numeric: tabular-nums;
+  transition: font-size var(--ws-duration-slow) var(--ws-ease-standard);
 }
 
 .ws-clock__date {
-  font-size: calc(0.95rem * var(--ws-clock-scale, 1));
+  font-size: calc(var(--ws-text-md) * var(--ws-clock-scale, 1));
   font-weight: 500;
   letter-spacing: 0.08em;
   color: var(--ws-color-text-secondary);
 }
 
+/* Explicit style overrides — a deliberate departure from whatever the
+   global Typography preset says, for users who want the clock specifically
+   to read differently from the rest of the workspace. "Auto" (the default)
+   intentionally has no override here: it just inherits the display tokens
+   above, so picking a Typography preset reshapes the clock too. */
+.ws-clock[data-style='thin'] .ws-clock__time {
+  font-family: var(--ws-font-family);
+  font-weight: 200;
+  letter-spacing: -0.02em;
+}
+
 .ws-clock[data-style='serif'] .ws-clock__time {
   font-family: Georgia, 'Iowan Old Style', serif;
   font-weight: 400;
+  letter-spacing: 0;
 }
 
 .ws-clock[data-style='rounded'] .ws-clock__time {
+  font-family: var(--ws-font-family);
   font-weight: 600;
   letter-spacing: -0.01em;
 }

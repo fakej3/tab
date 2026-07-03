@@ -34,6 +34,10 @@ export interface WidgetDescriptor {
   minSize?: { w: number; h: number };
   maxSize?: { w: number; h: number };
   resizable?: boolean;
+  /** Opts out of the default content clipping — for widgets that need to render a popover/dropdown (e.g. search suggestions) beyond their own bounds. */
+  allowOverflow?: boolean;
+  /** Widget starts hidden the first time it's auto-placed (still reachable via the layout editor's show/hide toggle) — for plugins with nothing to show until configured. */
+  defaultHidden?: boolean;
 }
 
 export interface Plugin {

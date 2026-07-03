@@ -16,8 +16,7 @@
   align-items: center;
   gap: var(--ws-space-2);
   color: var(--ws-color-text-tertiary);
-  font-size: 0.85rem;
-  transition: color var(--ws-duration-fast) var(--ws-ease-standard);
+  font-size: var(--ws-text-sm);
 }
 
 .ws-music__empty:hover {
@@ -47,8 +46,15 @@
   inset: 0;
   background-size: cover;
   background-position: center;
-  opacity: 0.18;
+  opacity: 0.16;
   border-radius: inherit;
+  transform: scale(1.02);
+  transition: opacity var(--ws-duration-slow) var(--ws-ease-standard), transform 6s var(--ws-ease-standard);
+}
+
+.ws-music__player.is-playing .ws-music__artwork {
+  opacity: 0.24;
+  transform: scale(1.08);
 }
 
 .ws-music__meta {
@@ -58,13 +64,22 @@
 
 .ws-music__title {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: var(--ws-text-md);
   color: var(--ws-color-text-primary);
 }
 
 .ws-music__artist {
-  font-size: 0.78rem;
+  font-size: var(--ws-text-xs);
   color: var(--ws-color-text-secondary);
+}
+
+.ws-music__fade {
+  transition: opacity 160ms var(--ws-ease-standard), transform 160ms var(--ws-ease-standard);
+}
+
+.ws-music__fade.is-fading {
+  opacity: 0;
+  transform: translateY(2px);
 }
 
 .ws-music__progress-track {
@@ -83,6 +98,23 @@
   width: 0%;
 }
 
+.ws-music__progress-knob {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ws-color-accent);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform var(--ws-duration-fast) var(--ws-ease-standard);
+  box-shadow: var(--ws-elevation-1);
+}
+
+.ws-music__progress-track:hover .ws-music__progress-knob {
+  transform: translate(-50%, -50%) scale(1);
+}
+
 .ws-music__transport {
   position: relative;
   z-index: 1;
@@ -99,12 +131,22 @@
   color: var(--ws-color-text-primary);
 }
 
+.ws-music__skip:hover {
+  color: var(--ws-color-accent);
+}
+
 .ws-music__play {
-  width: 34px;
-  height: 34px;
+  width: var(--ws-control-height-sm);
+  height: var(--ws-control-height-sm);
   border-radius: var(--ws-radius-pill);
   background: var(--ws-color-accent);
   color: var(--ws-color-accent-contrast);
+  box-shadow: var(--ws-elevation-1);
+  transition: box-shadow var(--ws-duration-base) var(--ws-ease-standard), transform var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-music__play:hover {
+  box-shadow: var(--ws-elevation-2), var(--ws-glow-accent);
 }
 
 .ws-music__volume {

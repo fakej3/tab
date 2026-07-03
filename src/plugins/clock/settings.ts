@@ -13,7 +13,7 @@ export const CLOCK_SETTINGS: Omit<SettingsSection, 'namespace'> = {
       key: 'style',
       type: 'select',
       label: 'Style',
-      default: 'thin',
+      default: 'auto',
       options: CLOCK_STYLES.map((style) => ({ label: style.label, value: style.value }))
     },
     { key: 'sizeScale', type: 'range', label: 'Size', default: 1, min: 0.6, max: 1.8, step: 0.05 },

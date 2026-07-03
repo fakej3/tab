@@ -1,12 +1,17 @@
 /**
- * Default token values, applied before JS boots (avoids a flash of
- * unstyled/undefined-variable content). ThemeEngine, AnimationEngine and the
- * Typography plugin overwrite these at runtime via
- * `document.documentElement.style.setProperty`; nothing here is ever read
- * directly by a plugin stylesheet other than through the `--ws-*` names.
+ * Design system tokens — the single vocabulary every surface in the app is
+ * built from. Nothing here is decorative filler: each scale exists because
+ * at least two unrelated places need to agree on the same value (a button
+ * and a widget both need "radius-md"; a card and the palette both need
+ * "elevation-2"). Applied before JS boots to avoid a flash of undefined-
+ * variable content; ThemeEngine/AnimationEngine/TypographyEngine overwrite
+ * the relevant subset at runtime via `setProperty` — plugin stylesheets
+ * only ever read `--ws-*`, never a hardcoded value.
  */
 :root {
-  /* Color */
+  /* ---------------------------------------------------------------- */
+  /* Color                                                             */
+  /* ---------------------------------------------------------------- */
   --ws-color-accent: #8b7cf6;
   --ws-color-accent-contrast: #0a0a0f;
   --ws-color-background: #0b0b10;
@@ -19,45 +24,121 @@
   --ws-color-warning: #fbbf24;
   --ws-color-danger: #f87171;
 
-  /* Surface */
+  /* ---------------------------------------------------------------- */
+  /* Surface: radius, glass, shadow                                    */
+  /* ---------------------------------------------------------------- */
   --ws-radius-base: 20px;
   --ws-glass-blur: 28px;
   --ws-glass-opacity: 0.1;
   --ws-shadow-intensity: 0.35;
 
-  /* Derived surface helpers (computed from the tokens above) */
-  --ws-surface-fill: rgb(from var(--ws-color-surface) r g b / var(--ws-glass-opacity));
-  --ws-surface-border-color: rgb(from var(--ws-color-surface-border) r g b / 0.14);
-  --ws-shadow-soft: 0 1px 2px rgb(0 0 0 / calc(var(--ws-shadow-intensity) * 0.2)),
-    0 12px 32px rgb(0 0 0 / calc(var(--ws-shadow-intensity) * 0.35));
+  /* Radius scale — derived from the single user-facing "radius" token so
+     turning one dial reshapes every surface consistently. */
+  --ws-radius-xs: calc(var(--ws-radius-base) * 0.3);
   --ws-radius-sm: calc(var(--ws-radius-base) * 0.5);
+  --ws-radius-md: var(--ws-radius-base);
   --ws-radius-lg: calc(var(--ws-radius-base) * 1.4);
+  --ws-radius-xl: calc(var(--ws-radius-base) * 2);
   --ws-radius-pill: 999px;
 
-  /* Motion */
+  /* Blur scale — for glass surfaces (backdrop-filter) and overlay dimming,
+     both derived from the single "glass blur" dial. */
+  --ws-blur-sm: calc(var(--ws-glass-blur) * 0.35);
+  --ws-blur-md: var(--ws-glass-blur);
+  --ws-blur-lg: calc(var(--ws-glass-blur) * 1.6);
+
+  /* Derived surface fills */
+  --ws-surface-fill: rgb(from var(--ws-color-surface) r g b / var(--ws-glass-opacity));
+  --ws-surface-fill-raised: rgb(from var(--ws-color-surface) r g b / calc(var(--ws-glass-opacity) * 1.6));
+  --ws-surface-border-color: rgb(from var(--ws-color-surface-border) r g b / 0.14);
+  --ws-surface-border-color-strong: rgb(from var(--ws-color-surface-border) r g b / 0.24);
+
+  /* Elevation — a 0–4 shadow scale. Every layered surface picks one level
+     instead of inventing its own box-shadow. Intensity scales with the
+     user's "shadow intensity" dial so the whole hierarchy dims/sharpens
+     together. */
+  --ws-elevation-0: none;
+  --ws-elevation-1: 0 1px 2px rgb(0 0 0 / calc(var(--ws-shadow-intensity) * 0.16)),
+    0 2px 8px rgb(0 0 0 / calc(var(--ws-shadow-intensity) * 0.16));
+  --ws-elevation-2: 0 2px 4px rgb(0 0 0 / calc(var(--ws-shadow-intensity) * 0.18)),
+    0 12px 32px rgb(0 0 0 / calc(var(--ws-shadow-intensity) * 0.32));
+  --ws-elevation-3: 0 4px 10px rgb(0 0 0 / calc(var(--ws-shadow-intensity) * 0.22)),
+    0 24px 56px rgb(0 0 0 / calc(var(--ws-shadow-intensity) * 0.4));
+  --ws-elevation-4: 0 8px 16px rgb(0 0 0 / calc(var(--ws-shadow-intensity) * 0.26)),
+    0 40px 96px rgb(0 0 0 / calc(var(--ws-shadow-intensity) * 0.48));
+  /* Alias kept for existing call sites; equal to elevation-2. */
+  --ws-shadow-soft: var(--ws-elevation-2);
+
+  /* A soft accent glow used sparingly for focus/active emphasis (palette,
+     primary controls) — never for decoration alone. */
+  --ws-glow-accent: 0 0 0 1px rgb(from var(--ws-color-accent) r g b / 0.4),
+    0 0 24px rgb(from var(--ws-color-accent) r g b / 0.25);
+
+  /* ---------------------------------------------------------------- */
+  /* Motion                                                            */
+  /* ---------------------------------------------------------------- */
   --ws-duration-fast: 120ms;
   --ws-duration-base: 220ms;
   --ws-duration-slow: 420ms;
+  --ws-duration-ambient: 4800ms;
   --ws-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
   --ws-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
   --ws-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ws-ease-linear: linear;
 
-  /* Typography (owned by the typography settings section) */
+  /* ---------------------------------------------------------------- */
+  /* Typography                                                        */
+  /* ---------------------------------------------------------------- */
   --ws-font-family: 'Workspace Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ws-font-family-display: var(--ws-font-family);
   --ws-font-family-mono: 'Workspace Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --ws-font-size-base: 15px;
-  --ws-letter-spacing-base: 0;
-  --ws-line-height-base: 1.5;
 
-  /* Spacing scale */
+  --ws-font-size-base: 15px;
+  --ws-letter-spacing-base: 0em;
+  --ws-line-height-base: 1.5;
+  --ws-font-weight-display: 200;
+  --ws-letter-spacing-display: -0.02em;
+  --ws-text-transform-label: none;
+
+  /* Type scale — every text element picks a step instead of a one-off
+     font-size. Steps are relative (rem-ish via em math against base) so the
+     whole scale rides the user's base size setting. */
+  --ws-text-2xs: 0.7rem;
+  --ws-text-xs: 0.78rem;
+  --ws-text-sm: 0.85rem;
+  --ws-text-md: 0.95rem;
+  --ws-text-lg: 1.15rem;
+  --ws-text-xl: 1.5rem;
+  --ws-text-2xl: 2rem;
+  --ws-text-3xl: 2.75rem;
+  --ws-text-4xl: 3.75rem;
+  --ws-text-5xl: 5rem;
+
+  /* ---------------------------------------------------------------- */
+  /* Sizing                                                            */
+  /* ---------------------------------------------------------------- */
+  --ws-icon-sm: 14px;
+  --ws-icon-md: 18px;
+  --ws-icon-lg: 24px;
+
+  --ws-control-height-sm: 28px;
+  --ws-control-height-md: 38px;
+  --ws-control-height-lg: 48px;
+
+  /* ---------------------------------------------------------------- */
+  /* Spacing scale                                                     */
+  /* ---------------------------------------------------------------- */
   --ws-space-1: 4px;
   --ws-space-2: 8px;
   --ws-space-3: 12px;
   --ws-space-4: 16px;
   --ws-space-5: 24px;
   --ws-space-6: 40px;
+  --ws-space-7: 64px;
 
-  /* Layering */
+  /* ---------------------------------------------------------------- */
+  /* Layering                                                          */
+  /* ---------------------------------------------------------------- */
   --ws-z-wallpaper: 0;
   --ws-z-layout: 10;
   --ws-z-chrome: 20;

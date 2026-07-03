@@ -1,5 +1,4 @@
 import type { Plugin, PluginContext } from '@core/plugins/Plugin';
-import './styles.css';
 import { WEATHER_PLUGIN_ID } from './constants';
 import { WEATHER_SETTINGS } from './settings';
 import { createWeatherPlaceholder } from './view';
@@ -20,7 +19,11 @@ export function createWeatherPlugin(): Plugin {
     widget: {
       defaultSize: { w: 3, h: 3 },
       minSize: { w: 2, h: 2 },
-      maxSize: { w: 5, h: 5 }
+      maxSize: { w: 5, h: 5 },
+      // No live provider is wired up (see README) — showing an apology
+      // card by default would undercut the first impression. Reveal it
+      // from the layout editor once a provider is connected.
+      defaultHidden: true
     },
 
     init(context: PluginContext) {

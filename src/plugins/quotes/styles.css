@@ -8,17 +8,45 @@
   position: relative;
 }
 
+/* A quiet oversized quotation mark sitting behind the text — the one
+   ornamental flourish this widget gets, and it costs nothing in clutter
+   since it lives behind the content at low opacity. */
+.ws-quotes::before {
+  content: '“';
+  position: absolute;
+  top: -0.35em;
+  left: var(--ws-space-4);
+  font-family: var(--ws-font-family-display);
+  font-size: 4.5rem;
+  line-height: 1;
+  color: var(--ws-color-text-primary);
+  opacity: 0.06;
+  pointer-events: none;
+}
+
 .ws-quotes__text {
-  font-size: 1.15rem;
+  font-family: var(--ws-font-family-display);
+  font-size: var(--ws-text-lg);
   font-weight: 400;
   line-height: 1.45;
   color: var(--ws-color-text-primary);
+  position: relative;
 }
 
 .ws-quotes__author {
   font-style: normal;
-  font-size: 0.85rem;
+  font-size: var(--ws-text-sm);
   color: var(--ws-color-text-secondary);
+  position: relative;
+}
+
+.ws-quotes__fade {
+  transition: opacity 180ms var(--ws-ease-standard), filter 180ms var(--ws-ease-standard);
+}
+
+.ws-quotes__fade.is-fading {
+  opacity: 0;
+  filter: blur(4px);
 }
 
 .ws-quotes__actions {
@@ -28,22 +56,24 @@
   display: flex;
   gap: var(--ws-space-1);
   opacity: 0;
-  transition: opacity var(--ws-duration-fast) var(--ws-ease-standard);
+  transform: translateY(-2px);
+  transition: opacity var(--ws-duration-fast) var(--ws-ease-standard), transform var(--ws-duration-fast) var(--ws-ease-standard);
 }
 
-.ws-quotes:hover .ws-quotes__actions {
+.ws-quotes:hover .ws-quotes__actions,
+.ws-quotes:focus-within .ws-quotes__actions {
   opacity: 1;
+  transform: translateY(0);
 }
 
 .ws-quotes__action {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: var(--ws-control-height-sm);
+  height: var(--ws-control-height-sm);
   border-radius: var(--ws-radius-pill);
   color: var(--ws-color-text-tertiary);
-  transition: color var(--ws-duration-fast) var(--ws-ease-standard), background var(--ws-duration-fast) var(--ws-ease-standard);
 }
 
 .ws-quotes__action:hover {
@@ -68,9 +98,10 @@
   border: 1px solid var(--ws-surface-border-color);
   border-radius: var(--ws-radius-sm);
   padding: var(--ws-space-2);
-  font-size: 0.85rem;
+  font-size: var(--ws-text-sm);
   color: var(--ws-color-text-primary);
   outline: none;
+  transition: border-color var(--ws-duration-base) var(--ws-ease-standard);
 }
 
 .ws-quotes__add-input:focus,

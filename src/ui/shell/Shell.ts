@@ -6,6 +6,8 @@ import { SettingsPanel } from '@ui/settings-panel/SettingsPanel';
 import { LayoutCanvas } from './LayoutCanvas';
 import './styles.css';
 
+const MOTION_BTN = 'ws-chrome__btn ws-motion-press';
+
 /**
  * Assembles the visible app: wallpaper (backmost), the widget layout
  * canvas, the settings panel + command palette overlays, and the minimal
@@ -19,10 +21,10 @@ export function mountShell(root: HTMLElement, app: Application): void {
 
   const editModeBtn = h(
     'button',
-    { class: 'ws-chrome__btn', type: 'button', 'aria-label': 'Edit layout', onclick: () => app.layout.setEditMode(!app.layout.isEditMode()) },
+    { class: MOTION_BTN, type: 'button', 'aria-label': 'Edit layout', onclick: () => app.layout.setEditMode(!app.layout.isEditMode()) },
     [icons.layoutEdit()]
   );
-  const settingsBtn = h('button', { class: 'ws-chrome__btn', type: 'button', 'aria-label': 'Open settings', onclick: () => settingsPanel.open() }, [
+  const settingsBtn = h('button', { class: MOTION_BTN, type: 'button', 'aria-label': 'Open settings', onclick: () => settingsPanel.open() }, [
     icons.gear()
   ]);
   const chrome = h('div', { class: 'ws-chrome ws-glass' }, [editModeBtn, settingsBtn]);
@@ -40,6 +42,20 @@ export function mountShell(root: HTMLElement, app: Application): void {
   commandPaletteView.mount(root);
 
   app.layout.subscribeEditMode((enabled) => editModeBtn.classList.toggle('is-active', enabled));
+
+  // Dim the wallpaper a touch while a focus-stealing overlay is open — a
+  // cheap way to direct attention to the palette/settings without changing
+  // either of their own styling. Shell owns this (not WallpaperEngine)
+  // because it's a cross-cutting UI concern, not a wallpaper concern.
+  let overlaysOpen = 0;
+  function adjustDimming(delta: number): void {
+    overlaysOpen = Math.max(0, overlaysOpen + delta);
+    wallpaperContainer.classList.toggle('is-dimmed', overlaysOpen > 0);
+  }
+  app.bus.on('command-palette:open', () => adjustDimming(1));
+  app.bus.on('command-palette:close', () => adjustDimming(-1));
+  app.bus.on('settings-panel:open', () => adjustDimming(1));
+  app.bus.on('settings-panel:close', () => adjustDimming(-1));
 
   renderWorkspaceSwitcher();
   app.layout.subscribe(renderWorkspaceSwitcher);
@@ -97,6 +113,15 @@ function registerCoreCommands(app: Application, settingsPanel: SettingsPanel): v
       title: `Theme: ${preset.replace('-', ' ')}`,
       group: 'Theme',
       perform: () => app.settings.set('theme', 'preset', preset)
+    });
+  }
+
+  for (const preset of ['minimal', 'editorial', 'modern', 'elegant', 'swiss', 'classic', 'monospace']) {
+    registry.register({
+      id: `typography-preset-${preset}`,
+      title: `Typography: ${preset}`,
+      group: 'Typography',
+      perform: () => app.settings.set('typography', 'preset', preset)
     });
   }
 }

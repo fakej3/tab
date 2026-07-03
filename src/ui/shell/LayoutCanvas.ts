@@ -79,7 +79,8 @@ export class LayoutCanvas {
   }
 
   private createHandle(widget: WidgetLayout): WidgetHandle {
-    const mountPoint = h('div', { class: 'ws-widget__content ws-glass' });
+    const allowOverflow = this.app.plugins.get(widget.pluginId)?.widget?.allowOverflow;
+    const mountPoint = h('div', { class: `ws-widget__content ws-glass${allowOverflow ? ' ws-widget__content--overflow-visible' : ''}` });
     const overlay = h('div', { class: 'ws-widget__overlay' });
     const wrapper = h('div', { class: 'ws-widget', 'data-plugin-id': widget.pluginId }, [mountPoint, overlay]);
     this.container.append(wrapper);
@@ -106,12 +107,22 @@ export class LayoutCanvas {
 
     const lockBtn = h(
       'button',
-      { class: 'ws-widget__btn', type: 'button', title: widget.locked ? 'Unlock' : 'Lock', onclick: () => this.app.layout.toggleLock(widget.instanceId) },
+      {
+        class: 'ws-widget__btn ws-motion-press',
+        type: 'button',
+        title: widget.locked ? 'Unlock' : 'Lock',
+        onclick: () => this.app.layout.toggleLock(widget.instanceId)
+      },
       [widget.locked ? '🔒' : '🔓']
     );
     const hideBtn = h(
       'button',
-      { class: 'ws-widget__btn', type: 'button', title: widget.hidden ? 'Show' : 'Hide', onclick: () => this.app.layout.toggleHidden(widget.instanceId) },
+      {
+        class: 'ws-widget__btn ws-motion-press',
+        type: 'button',
+        title: widget.hidden ? 'Show' : 'Hide',
+        onclick: () => this.app.layout.toggleHidden(widget.instanceId)
+      },
       [widget.hidden ? '🙈' : '👁']
     );
     const controls = h('div', { class: 'ws-widget__controls' }, [lockBtn, hideBtn]);
@@ -127,6 +138,8 @@ export class LayoutCanvas {
     const startX = event.clientX;
     const startY = event.clientY;
     const columnWidth = this.columnWidthPx();
+    const wrapper = this.handles.get(widget.instanceId)?.wrapper;
+    wrapper?.classList.add('is-dragging');
 
     const onMove = (moveEvent: PointerEvent) => {
       const delta = pixelsToGridDelta(
@@ -137,6 +150,7 @@ export class LayoutCanvas {
       this.app.layout.moveWidget(widget.instanceId, widget.x + delta.x, widget.y + delta.y);
     };
     const onUp = () => {
+      wrapper?.classList.remove('is-dragging');
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
     };
@@ -150,6 +164,8 @@ export class LayoutCanvas {
     const startX = event.clientX;
     const startY = event.clientY;
     const columnWidth = this.columnWidthPx();
+    const wrapper = this.handles.get(widget.instanceId)?.wrapper;
+    wrapper?.classList.add('is-dragging');
 
     const onMove = (moveEvent: PointerEvent) => {
       const delta = pixelsToGridDelta(
@@ -160,6 +176,7 @@ export class LayoutCanvas {
       this.app.layout.resizeWidget(widget.instanceId, widget.w + delta.x, widget.h + delta.y);
     };
     const onUp = () => {
+      wrapper?.classList.remove('is-dragging');
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('pointerup', onUp);
     };

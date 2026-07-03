@@ -15,7 +15,8 @@ export function createSearchPlugin(): Plugin {
     widget: {
       defaultSize: { w: 6, h: 2 },
       minSize: { w: 4, h: 2 },
-      maxSize: { w: 12, h: 2 }
+      maxSize: { w: 12, h: 2 },
+      allowOverflow: true
     },
 
     init(context: PluginContext) {
@@ -24,7 +25,7 @@ export function createSearchPlugin(): Plugin {
     },
 
     mount(container: HTMLElement) {
-      controller?.mount(container);
+      void controller?.mount(container);
     },
 
     unmount() {

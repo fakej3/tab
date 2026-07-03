@@ -34,14 +34,8 @@
 }
 
 .ws-bookmarks__label {
-  font-size: 0.85rem;
+  font-size: var(--ws-text-sm);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.ws-bookmarks__message {
-  padding: var(--ws-space-3);
-  font-size: 0.8rem;
-  color: var(--ws-color-text-tertiary);
 }

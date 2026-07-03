@@ -11,7 +11,10 @@ export interface Track {
 export const VISUALIZER_TYPES = [
   { label: 'Bars', value: 'bars' },
   { label: 'Wave', value: 'wave' },
-  { label: 'Circular', value: 'circular' }
+  { label: 'Minimal Line', value: 'line' },
+  { label: 'Dots', value: 'dots' },
+  { label: 'Circular', value: 'circular' },
+  { label: 'Breathing', value: 'breathing' }
 ] as const;
 
 export type VisualizerType = (typeof VISUALIZER_TYPES)[number]['value'];

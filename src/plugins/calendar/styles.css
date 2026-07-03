@@ -8,7 +8,7 @@
 
 .ws-calendar__heading {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--ws-text-sm);
   color: var(--ws-color-text-primary);
 }
 
@@ -20,7 +20,7 @@
 }
 
 .ws-calendar__weekday {
-  font-size: 0.65rem;
+  font-size: var(--ws-text-2xs);
   text-align: center;
   color: var(--ws-color-text-tertiary);
   padding-bottom: var(--ws-space-1);
@@ -30,16 +30,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: var(--ws-text-xs);
   color: var(--ws-color-text-secondary);
   border-radius: var(--ws-radius-sm);
   aspect-ratio: 1;
+  transition: background var(--ws-duration-base) var(--ws-ease-standard), box-shadow var(--ws-duration-base) var(--ws-ease-standard);
 }
 
 .ws-calendar__day.is-today {
   background: var(--ws-color-accent);
   color: var(--ws-color-accent-contrast);
   font-weight: 600;
+  box-shadow: var(--ws-glow-accent);
 }
 
 .ws-calendar__day.is-empty {

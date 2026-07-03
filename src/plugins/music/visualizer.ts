@@ -90,6 +90,9 @@ export class Visualizer {
 
     if (config.type === 'bars') this.drawBars(width, height);
     else if (config.type === 'wave') this.drawWave(width, height);
+    else if (config.type === 'line') this.drawLine(width, height);
+    else if (config.type === 'dots') this.drawDots(width, height);
+    else if (config.type === 'breathing') this.drawBreathing(width, height);
     else this.drawCircular(width, height);
 
     ctx.globalAlpha = 1;
@@ -126,6 +129,51 @@ export class Visualizer {
     values.forEach((value, index) => {
       const x = (index / (values.length - 1)) * width;
       const y = height / 2 - value * (height / 2 - this.config.thickness);
+      if (index === 0) this.ctx.moveTo(x, y);
+      else this.ctx.lineTo(x, y);
+    });
+    this.ctx.stroke();
+  }
+
+  private drawLine(width: number, height: number): void {
+    const values = this.sampleCount(96);
+    this.ctx.lineWidth = Math.min(1.5, this.config.thickness * 0.5);
+    this.ctx.lineJoin = 'round';
+    this.ctx.lineCap = 'round';
+    this.ctx.beginPath();
+    values.forEach((value, index) => {
+      const x = (index / (values.length - 1)) * width;
+      const y = height / 2 - value * (height / 2 - 2);
+      if (index === 0) this.ctx.moveTo(x, y);
+      else this.ctx.lineTo(x, y);
+    });
+    this.ctx.stroke();
+  }
+
+  private drawDots(width: number, height: number): void {
+    const bucketCount = Math.max(6, Math.floor(width / (this.config.thickness * 8)));
+    const values = this.sampleCount(bucketCount);
+    const gap = width / bucketCount;
+    values.forEach((value, index) => {
+      const x = index * gap + gap / 2;
+      const radius = Math.max(1.5, this.config.thickness * 0.6 + value * this.config.thickness * 1.8);
+      this.ctx.beginPath();
+      this.ctx.arc(x, height / 2 - value * (height / 2 - radius), radius, 0, Math.PI * 2);
+      this.ctx.fill();
+      this.ctx.beginPath();
+      this.ctx.arc(x, height / 2 + value * (height / 2 - radius), radius * 0.6, 0, Math.PI * 2);
+      this.ctx.fill();
+    });
+  }
+
+  /** Wave shape with a slow sinusoidal amplitude envelope layered on top — a calmer, more organic read than a plain reactive wave. */
+  private drawBreathing(width: number, height: number): void {
+    const values = this.sampleCount(64);
+    const envelope = 0.7 + 0.3 * Math.sin(performance.now() / 2200);
+    this.ctx.beginPath();
+    values.forEach((value, index) => {
+      const x = (index / (values.length - 1)) * width;
+      const y = height / 2 - value * envelope * (height / 2 - this.config.thickness);
       if (index === 0) this.ctx.moveTo(x, y);
       else this.ctx.lineTo(x, y);
     });

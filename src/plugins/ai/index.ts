@@ -1,5 +1,4 @@
 import type { Plugin, PluginContext } from '@core/plugins/Plugin';
-import './styles.css';
 import { AI_PLUGIN_ID } from './constants';
 import { AI_SETTINGS } from './settings';
 import { createAiPlaceholder } from './view';
@@ -21,7 +20,10 @@ export function createAiPlugin(): Plugin {
     widget: {
       defaultSize: { w: 4, h: 3 },
       minSize: { w: 3, h: 2 },
-      maxSize: { w: 8, h: 6 }
+      maxSize: { w: 8, h: 6 },
+      // Same reasoning as Weather: no provider wired up yet, so it starts
+      // hidden rather than greeting new users with an empty placeholder.
+      defaultHidden: true
     },
 
     init(pluginContext: PluginContext) {

@@ -7,9 +7,10 @@
   align-items: flex-start;
   padding-top: 14vh;
   background: rgb(0 0 0 / 0.32);
+  backdrop-filter: blur(2px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--ws-duration-fast) var(--ws-ease-standard);
+  transition: opacity var(--ws-duration-base) var(--ws-ease-standard);
 }
 
 .ws-palette-backdrop.is-open {
@@ -23,6 +24,18 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow: var(--ws-elevation-4);
+  transform: scale(0.97) translateY(-6px);
+  filter: blur(6px);
+  opacity: 0;
+  transition: transform var(--ws-duration-base) var(--ws-ease-emphasized), filter var(--ws-duration-base) var(--ws-ease-emphasized),
+    opacity var(--ws-duration-base) var(--ws-ease-emphasized);
+}
+
+.ws-palette-backdrop.is-open .ws-palette {
+  transform: scale(1) translateY(0);
+  filter: blur(0);
+  opacity: 1;
 }
 
 .ws-palette__input-row {
@@ -39,7 +52,7 @@
   background: transparent;
   border: none;
   outline: none;
-  font-size: 1rem;
+  font-size: var(--ws-text-md);
   color: var(--ws-color-text-primary);
 }
 
@@ -56,7 +69,8 @@
   padding: var(--ws-space-3);
   border-radius: var(--ws-radius-sm);
   color: var(--ws-color-text-secondary);
-  font-size: 0.88rem;
+  font-size: var(--ws-text-md);
+  transition: background var(--ws-duration-fast) var(--ws-ease-standard), color var(--ws-duration-fast) var(--ws-ease-standard);
 }
 
 .ws-palette__item.is-active {
@@ -65,13 +79,20 @@
 }
 
 .ws-palette__item-group {
-  font-size: 0.7rem;
+  font-size: var(--ws-text-2xs);
   color: var(--ws-color-text-tertiary);
 }
 
 .ws-palette__empty {
   padding: var(--ws-space-4);
   text-align: center;
-  font-size: 0.85rem;
+  font-size: var(--ws-text-sm);
   color: var(--ws-color-text-tertiary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-palette {
+    transform: none;
+    filter: none;
+  }
 }

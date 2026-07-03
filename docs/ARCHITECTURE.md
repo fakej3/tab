@@ -21,6 +21,7 @@ src/
     settings/         # SettingsManager, SettingsSchema (the declarative field types)
     plugins/          # Plugin contract, PluginManager
     theme/             # ThemeEngine, tokens, presets, wallpaper color extraction
+    typography/        # TypographyEngine, type presets (Minimal/Editorial/Modern/Elegant/Swiss/Classic/Mono)
     animation/         # AnimationEngine, motion tokens, WAAPI helpers
     layout/             # LayoutEngine, grid math
     wallpaper/          # WallpaperEngine (its own section in the spec, not a plugin)

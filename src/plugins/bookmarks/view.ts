@@ -25,7 +25,7 @@ export function createBookmarksView(): BookmarksView {
       const item = h(
         'button',
         {
-          class: 'ws-bookmarks__item',
+          class: 'ws-bookmarks__item ws-motion-shimmer',
           type: 'button',
           title: entry.title,
           onclick: () => onOpen(entry.url!)
@@ -38,7 +38,12 @@ export function createBookmarksView(): BookmarksView {
   }
 
   function showMessage(message: string): void {
-    list.replaceChildren(h('p', { class: 'ws-bookmarks__message' }, [message]));
+    list.replaceChildren(
+      h('div', { class: 'ws-empty-state' }, [
+        h('div', { class: 'ws-empty-state__icon' }, ['☆']),
+        h('p', { class: 'ws-empty-state__title' }, [message])
+      ])
+    );
   }
 
   return { root, render, showMessage };

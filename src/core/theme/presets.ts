@@ -20,13 +20,20 @@ export const THEME_PRESETS: ThemePreset[] = [
       accent: '#6d5efc',
       accentContrast: '#ffffff',
       background: '#eef0f6',
-      surface: '#0a0a1a',
+      // Surface stays light (not dark) and glassOpacity is pushed high —
+      // widgets render as translucent glass *over the wallpaper*, which is
+      // independently dark by default and user-controlled. A light surface
+      // pairs correctly with dark text regardless of what's behind it; a
+      // dark surface would silently break dark-on-dark once composited
+      // over a dark wallpaper, which is exactly what shipped here before
+      // this was caught in review.
+      surface: '#ffffff',
       surfaceBorder: '#0a0a1a',
       textPrimary: '#15151f',
       textSecondary: 'rgba(21, 21, 31, 0.7)',
       textTertiary: 'rgba(21, 21, 31, 0.46)',
-      glassOpacity: 0.55,
-      shadowIntensity: 0.12
+      glassOpacity: 0.82,
+      shadowIntensity: 0.14
     }
   },
   {

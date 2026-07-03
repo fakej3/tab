@@ -65,7 +65,7 @@ export class LayoutEngine {
           instanceId: createId('widget'),
           pluginId,
           locked: false,
-          hidden: false,
+          hidden: descriptor.defaultHidden ?? false,
           ...slot
         };
         return { ...workspace, widgets: [...workspace.widgets, widget] };
