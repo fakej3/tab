@@ -8,22 +8,30 @@
 
 .ws-calendar__heading {
   font-weight: 600;
-  font-size: var(--ws-text-sm);
+  font-size: var(--ws-text-md);
+  letter-spacing: -0.01em;
   color: var(--ws-color-text-primary);
 }
 
 .ws-calendar__grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: var(--ws-space-hairline);
-  flex: 1;
+  gap: var(--ws-space-1);
+  /* The grid sits inside a flex:1 parent that's often taller than its
+     content — without this, the browser's default stretch alignment
+     spreads the implicit rows across all that leftover height, opening
+     up a much bigger gap between week rows than the `gap` above actually
+     asks for. Pack rows at their own size instead. */
+  align-content: start;
 }
 
 .ws-calendar__weekday {
   font-size: var(--ws-text-2xs);
   text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--ws-color-text-tertiary);
-  padding-bottom: var(--ws-space-1);
+  padding-bottom: var(--ws-space-2);
 }
 
 .ws-calendar__day {
@@ -31,10 +39,17 @@
   align-items: center;
   justify-content: center;
   font-size: var(--ws-text-xs);
+  font-variant-numeric: tabular-nums;
   color: var(--ws-color-text-secondary);
   border-radius: var(--ws-radius-sm);
   aspect-ratio: 1;
-  transition: background var(--ws-duration-base) var(--ws-ease-standard), box-shadow var(--ws-duration-base) var(--ws-ease-standard);
+  transition: background var(--ws-duration-base) var(--ws-ease-standard), color var(--ws-duration-base) var(--ws-ease-standard),
+    box-shadow var(--ws-duration-base) var(--ws-ease-standard);
+}
+
+.ws-calendar__day:not(.is-empty):not(.is-today):hover {
+  background: color-mix(in srgb, var(--ws-color-text-primary) 8%, transparent);
+  color: var(--ws-color-text-primary);
 }
 
 .ws-calendar__day.is-today {

@@ -1,28 +1,35 @@
 .ws-notes {
   height: 100%;
-  padding: var(--ws-space-4);
+  padding: var(--ws-space-5);
 }
 
+/* A writing surface, not a form field — no visible box at rest or on
+   focus. The only feedback on focus is the caret itself and a very quiet
+   lift in text contrast, the way a page in Notes.app never grows a
+   rectangle around itself just because you tapped into it. */
 .ws-notes__textarea {
   width: 100%;
   height: 100%;
   resize: none;
   background: transparent;
-  /* Transparent (not none) so focus can add color without a layout shift —
-     same accent-border-on-focus treatment every other text input in the
-     app uses (quotes composer, settings fields) instead of the removed
-     native outline. */
-  border: 1px solid transparent;
+  border: none;
   outline: none;
-  border-radius: var(--ws-radius-sm);
+  caret-color: var(--ws-color-accent);
   color: var(--ws-color-text-primary);
-  font-size: var(--ws-text-sm);
-  line-height: var(--ws-line-height-base);
-  transition: border-color var(--ws-duration-base) var(--ws-ease-standard);
+  font-family: var(--ws-font-family-display);
+  font-size: var(--ws-text-md);
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: -0.006em;
+  border-radius: var(--ws-radius-sm);
+  transition: color var(--ws-duration-base) var(--ws-ease-standard), box-shadow var(--ws-duration-base) var(--ws-ease-standard);
 }
 
+/* Still a real, visible focus indicator (keyboard users need one) — just a
+   soft inset ring instead of the harsh rectangular border a bare <textarea>
+   gets by default. */
 .ws-notes__textarea:focus {
-  border-color: var(--ws-color-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ws-color-accent) 30%, transparent);
 }
 
 .ws-notes__textarea[data-font='mono'] {
@@ -31,4 +38,5 @@
 
 .ws-notes__textarea::placeholder {
   color: var(--ws-color-text-tertiary);
+  font-style: italic;
 }

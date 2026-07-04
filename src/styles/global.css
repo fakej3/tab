@@ -121,25 +121,34 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: var(--ws-space-1);
+  gap: var(--ws-space-2);
   padding: var(--ws-space-4);
   color: var(--ws-color-text-tertiary);
 }
 
+/* A quiet backing plate rather than a bare icon floating in space — the
+   one small detail that keeps an "unfinished" state from reading as a
+   dev placeholder. */
 .ws-empty-state__icon {
   display: flex;
-  color: var(--ws-color-text-tertiary);
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--ws-radius-pill);
+  background: color-mix(in srgb, var(--ws-color-text-primary) 6%, transparent);
+  color: var(--ws-color-text-secondary);
   margin-bottom: var(--ws-space-1);
-  opacity: 0.8;
 }
 
 .ws-empty-state__icon svg {
-  width: var(--ws-icon-lg);
-  height: var(--ws-icon-lg);
+  width: var(--ws-icon-md);
+  height: var(--ws-icon-md);
 }
 
 .ws-empty-state__title {
   font-size: var(--ws-text-sm);
+  font-weight: 500;
   color: var(--ws-color-text-secondary);
 }
 

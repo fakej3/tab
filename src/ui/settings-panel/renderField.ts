@@ -63,6 +63,12 @@ function buildControl(field: SettingField, ctx: FieldRenderContext, onChange: ()
     }
 
     case 'range': {
+      const setFill = (el: HTMLInputElement) => {
+        const min = Number(el.min) || 0;
+        const max = Number(el.max) || 100;
+        const pct = max > min ? ((Number(el.value) - min) / (max - min)) * 100 : 0;
+        el.style.setProperty('--ws-range-fill', `${pct}%`);
+      };
       const input = h('input', {
         id,
         type: 'range',
@@ -71,11 +77,14 @@ function buildControl(field: SettingField, ctx: FieldRenderContext, onChange: ()
         max: String(field.max),
         step: String(field.step ?? 1),
         oninput: (e: Event) => {
-          ctx.setValue(field.key, Number((e.target as HTMLInputElement).value));
+          const el = e.target as HTMLInputElement;
+          setFill(el);
+          ctx.setValue(field.key, Number(el.value));
           onChange();
         }
       }) as HTMLInputElement;
       input.value = String(ctx.getValue(field.key));
+      setFill(input);
       return input;
     }
 
