@@ -23,6 +23,7 @@ export class Visualizer {
   private smoothed: Float32Array = new Float32Array(0);
   private rafId: number | null = null;
   private config: VisualizerConfig;
+  private lastDrawAt = 0;
 
   constructor(canvas: HTMLCanvasElement, config: VisualizerConfig) {
     this.canvas = canvas;
@@ -44,9 +45,20 @@ export class Visualizer {
 
   start(): void {
     if (this.rafId !== null) return;
-    const loop = () => {
-      this.draw();
+    const loop = (now: number) => {
       this.rafId = requestAnimationFrame(loop);
+      // Three independent reasons to skip a paint this frame, all cheap to
+      // check: the tab isn't visible (rAF already throttles this in most
+      // browsers, but skip the canvas work too rather than trust that),
+      // reduced motion means a settled ~1fps read instead of a continuous
+      // animation, and otherwise cap to ~30fps — a smoothed visualizer is
+      // visually identical to 60fps but half the paint cost.
+      if (document.hidden) return;
+      const reducedMotion = document.documentElement.classList.contains('is-reduced-motion');
+      const minInterval = reducedMotion ? 1000 : 1000 / 30;
+      if (now - this.lastDrawAt < minInterval) return;
+      this.lastDrawAt = now;
+      this.draw();
     };
     this.rafId = requestAnimationFrame(loop);
   }
@@ -89,6 +101,7 @@ export class Visualizer {
     }
 
     if (config.type === 'bars') this.drawBars(width, height);
+    else if (config.type === 'spectrum') this.drawSpectrum(width, height);
     else if (config.type === 'wave') this.drawWave(width, height);
     else if (config.type === 'line') this.drawLine(width, height);
     else if (config.type === 'dots') this.drawDots(width, height);
@@ -121,6 +134,36 @@ export class Visualizer {
       this.ctx.moveTo(x, height);
       this.ctx.lineTo(x, height - barHeight);
       this.ctx.stroke();
+    });
+  }
+
+  /** A classic mirrored frequency-bar spectrum — distinct from `bars` (a
+   *  single flat-color column chart): each bar fades from full color to
+   *  transparent along its own length and mirrors a fainter reflection
+   *  below the centerline, closer to a hardware EQ display. */
+  private drawSpectrum(width: number, height: number): void {
+    const bucketCount = Math.max(12, Math.floor(width / (this.config.thickness * 2.5)));
+    const values = this.sampleCount(bucketCount);
+    const gap = width / bucketCount;
+    const barWidth = Math.max(1, gap * 0.6);
+    const center = height * 0.62;
+    values.forEach((value, index) => {
+      const x = index * gap + (gap - barWidth) / 2;
+      const barHeight = Math.max(2, value * center);
+      const gradient = this.ctx.createLinearGradient(0, center - barHeight, 0, center);
+      gradient.addColorStop(0, this.config.color);
+      gradient.addColorStop(1, 'transparent');
+      this.ctx.fillStyle = gradient;
+      this.ctx.fillRect(x, center - barHeight, barWidth, barHeight);
+
+      const reflectHeight = barHeight * 0.35;
+      const reflectGradient = this.ctx.createLinearGradient(0, center, 0, center + reflectHeight);
+      reflectGradient.addColorStop(0, this.config.color);
+      reflectGradient.addColorStop(1, 'transparent');
+      this.ctx.globalAlpha = this.config.opacity * 0.4;
+      this.ctx.fillStyle = reflectGradient;
+      this.ctx.fillRect(x, center, barWidth, reflectHeight);
+      this.ctx.globalAlpha = this.config.opacity;
     });
   }
 

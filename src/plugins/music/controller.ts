@@ -1,65 +1,95 @@
 import type { PluginContext } from '@core/plugins/Plugin';
-import type { Track, VisualizerType } from './constants';
-import { createMusicView, type MusicView } from './view';
+import type { MediaLayout, VisualizerType } from './constants';
+import { MediaEngine } from './MediaEngine';
+import { BrowserMediaSessionProvider } from './providers/BrowserMediaSessionProvider';
+import { createPlaceholderProvider, PLACEHOLDER_PROVIDERS } from './providers/PlaceholderProvider';
+import type { MediaState } from './types';
+import { createMediaView, type MediaView } from './view';
 import { Visualizer } from './visualizer';
 
 export class MusicController {
-  private view: MusicView | null = null;
-  private audio = new Audio();
-  private audioContext: AudioContext | null = null;
-  private analyser: AnalyserNode | null = null;
-  private gainNode: GainNode | null = null;
+  private view: MediaView | null = null;
+  private engine: MediaEngine | null = null;
   private visualizer: Visualizer | null = null;
-  private playlist: Track[] = [];
-  private currentIndex = -1;
   private unsubscribeSettings: (() => void) | null = null;
+  private unsubscribeState: (() => void) | null = null;
+  private lastStatus: MediaState['status'] | null = null;
+  // Settings.subscribe here only ever fires for the music namespace, so a
+  // live reduce-motion toggle (a different namespace entirely) wouldn't
+  // otherwise reach applySettings() until something in Media Hub's own
+  // settings happened to change too. Watching the class directly is the
+  // same source of truth every other engine reduces to anyway.
+  private motionObserver: MutationObserver | null = null;
 
   constructor(private context: PluginContext) {}
 
   mount(container: HTMLElement): void {
-    this.view = createMusicView({
-      onPickFiles: (files) => this.addFiles(files),
-      onPlayPause: () => this.togglePlay(),
-      onSkip: (direction) => this.skip(direction),
-      onSeek: (ratio) => this.seek(ratio),
-      onVolumeChange: (volume) => this.setVolume(volume, true)
+    this.engine = new MediaEngine(this.context.logger);
+    this.engine.register(new BrowserMediaSessionProvider());
+    for (const placeholder of PLACEHOLDER_PROVIDERS) this.engine.register(createPlaceholderProvider(placeholder.id, placeholder.name));
+
+    this.view = createMediaView({
+      onPickFiles: (files) => this.engine?.loadFiles(files),
+      onPlayPause: () => this.engine?.togglePlay(),
+      onSkip: (direction) => (direction === 1 ? this.engine?.next() : this.engine?.previous()),
+      onSeek: (ratio) => this.engine?.seek(ratio),
+      onVolumeChange: (volume) => {
+        this.engine?.setVolume(volume);
+        this.context.settings.set('volume', volume);
+      }
     });
     container.append(this.view.root);
-    this.view.showEmpty();
 
     this.visualizer = new Visualizer(this.view.canvas, this.readVisualizerConfig());
-    this.setVolume(this.context.settings.get<number>('volume'), false);
 
-    this.audio.addEventListener('timeupdate', () => this.view?.setProgress(this.audio.currentTime, this.audio.duration || 0));
-    this.audio.addEventListener('play', () => {
-      this.view?.setPlaying(true);
-      this.visualizer?.start();
-      this.context.bus.emit('music:playback-changed', { playing: true });
-    });
-    this.audio.addEventListener('pause', () => {
-      this.view?.setPlaying(false);
-      this.visualizer?.stop();
-      this.context.bus.emit('music:playback-changed', { playing: false });
-    });
-    this.audio.addEventListener('ended', () => this.skip(1));
+    this.unsubscribeState = this.engine.state.subscribe((state) => this.handleState(state));
+    this.handleState(this.engine.state.peek());
 
     this.unsubscribeSettings = this.context.settings.subscribe(() => this.applySettings());
     this.applySettings();
-    this.setupMediaSession();
+
+    this.motionObserver = new MutationObserver(() => this.applySettings());
+    this.motionObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   }
 
   unmount(): void {
     this.unsubscribeSettings?.();
     this.unsubscribeSettings = null;
-    this.audio.pause();
-    this.audio.src = '';
+    this.unsubscribeState?.();
+    this.unsubscribeState = null;
+    this.motionObserver?.disconnect();
+    this.motionObserver = null;
     this.visualizer?.stop();
-    for (const track of this.playlist) URL.revokeObjectURL(track.objectUrl);
-    this.playlist = [];
-    void this.audioContext?.close();
-    this.audioContext = null;
+    this.visualizer = null;
+    for (const provider of this.engine?.getProviders() ?? []) provider.dispose();
+    this.engine = null;
     this.view?.root.remove();
     this.view = null;
+  }
+
+  private handleState(state: MediaState): void {
+    this.view?.render(state);
+    this.context.bus.emit('music:playback-changed', { playing: state.status === 'playing' });
+    if (state.track) this.context.bus.emit('music:track-changed', { title: state.track.title, artist: state.track.artist, artworkUrl: state.track.artworkUrl });
+    this.view?.setVolumeSlider(state.volume);
+    this.lastStatus = state.status;
+    this.syncVisualizerRunning();
+  }
+
+  /** The visualizer should only ever be painting while a track is actually
+   *  playing AND the user hasn't turned it off — checked from both the
+   *  playback-state stream and the settings stream so toggling either one
+   *  mid-playback take effect immediately instead of on the next track
+   *  change. */
+  private syncVisualizerRunning(): void {
+    const showVisualizer = this.context.settings.get<boolean>('showVisualizer');
+    if (this.lastStatus === 'playing' && showVisualizer) {
+      const analyser = this.engine?.getAnalyser() ?? null;
+      if (analyser) this.visualizer?.attach(analyser);
+      this.visualizer?.start();
+    } else {
+      this.visualizer?.stop();
+    }
   }
 
   private readVisualizerConfig() {
@@ -77,89 +107,26 @@ export class MusicController {
   }
 
   private applySettings(): void {
-    this.setVolume(this.context.settings.get<number>('volume'), false);
+    if (!this.view) return;
+    const showVisualizer = this.context.settings.get<boolean>('showVisualizer');
     this.visualizer?.updateConfig(this.readVisualizerConfig());
-    if (this.view) this.view.canvas.style.display = this.context.settings.get<boolean>('showVisualizer') ? '' : 'none';
+    this.view.setVisualizerVisible(showVisualizer);
+    this.view.setLayout(this.context.settings.get<MediaLayout>('layout'));
+    this.view.setShowProviderName(this.context.settings.get<boolean>('showProviderName'));
+    this.view.setShowTimeline(this.context.settings.get<boolean>('showTimeline'));
+    this.view.setShowTransportControls(this.context.settings.get<boolean>('showTransportControls'));
+    this.view.setAutoHide(this.context.settings.get<boolean>('autoHideControls'));
+    this.view.setArtworkScale(this.context.settings.get<number>('artworkScale'));
+    // The "animation intensity" dial only ever turns motion down further —
+    // reduced-motion (OS-level or the in-app toggle, both surfaced as the
+    // same `is-reduced-motion` class) always wins, the same rule every
+    // other engine in the app follows. Since --ws-music-motion is set as an
+    // inline style below, a CSS override for the reduced-motion case would
+    // silently lose to it — the clamp has to happen here, at the source.
+    const reducedMotion = document.documentElement.classList.contains('is-reduced-motion');
+    this.view.setMotionIntensity(reducedMotion ? 0 : this.context.settings.get<number>('motionIntensity'));
+    const volume = this.context.settings.get<number>('volume');
+    this.engine?.setVolume(volume);
+    this.syncVisualizerRunning();
   }
-
-  private ensureAudioGraph(): void {
-    if (this.audioContext) return;
-    this.audioContext = new AudioContext();
-    const source = this.audioContext.createMediaElementSource(this.audio);
-    this.analyser = this.audioContext.createAnalyser();
-    this.analyser.fftSize = 256;
-    this.gainNode = this.audioContext.createGain();
-    source.connect(this.analyser).connect(this.gainNode).connect(this.audioContext.destination);
-    this.visualizer?.attach(this.analyser);
-  }
-
-  private addFiles(files: FileList): void {
-    const newTracks: Track[] = Array.from(files).map((file) => ({
-      id: `${file.name}_${file.lastModified}`,
-      title: stripExtension(file.name),
-      artist: 'Local file',
-      objectUrl: URL.createObjectURL(file)
-    }));
-    this.playlist = [...this.playlist, ...newTracks];
-    if (this.currentIndex === -1) this.playTrackAt(this.playlist.length - newTracks.length);
-  }
-
-  private playTrackAt(index: number): void {
-    if (index < 0 || index >= this.playlist.length) return;
-    this.currentIndex = index;
-    const track = this.playlist[index]!;
-    this.ensureAudioGraph();
-    this.audio.src = track.objectUrl;
-    void this.audio.play();
-    this.view?.showPlayer(track);
-    this.updateMediaSessionMetadata(track);
-    this.context.bus.emit('music:track-changed', { title: track.title, artist: track.artist, artworkUrl: track.artworkUrl });
-  }
-
-  private togglePlay(): void {
-    if (this.currentIndex === -1) return;
-    if (this.audio.paused) void this.audio.play();
-    else this.audio.pause();
-  }
-
-  private skip(direction: -1 | 1): void {
-    if (this.playlist.length === 0) return;
-    const next = (this.currentIndex + direction + this.playlist.length) % this.playlist.length;
-    this.playTrackAt(next);
-  }
-
-  private seek(ratio: number): void {
-    if (!Number.isFinite(this.audio.duration)) return;
-    this.audio.currentTime = ratio * this.audio.duration;
-  }
-
-  private setVolume(volume: number, persist: boolean): void {
-    this.audio.volume = volume;
-    this.view?.setVolumeSlider(volume);
-    if (persist) this.context.settings.set('volume', volume);
-  }
-
-  private setupMediaSession(): void {
-    if (!('mediaSession' in navigator)) return;
-    navigator.mediaSession.setActionHandler('play', () => this.togglePlay());
-    navigator.mediaSession.setActionHandler('pause', () => this.togglePlay());
-    navigator.mediaSession.setActionHandler('previoustrack', () => this.skip(-1));
-    navigator.mediaSession.setActionHandler('nexttrack', () => this.skip(1));
-    navigator.mediaSession.setActionHandler('seekto', (details) => {
-      if (details.seekTime !== undefined) this.audio.currentTime = details.seekTime;
-    });
-  }
-
-  private updateMediaSessionMetadata(track: Track): void {
-    if (!('mediaSession' in navigator)) return;
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: track.title,
-      artist: track.artist,
-      artwork: track.artworkUrl ? [{ src: track.artworkUrl }] : []
-    });
-  }
-}
-
-function stripExtension(filename: string): string {
-  return filename.replace(/\.[^/.]+$/, '');
 }

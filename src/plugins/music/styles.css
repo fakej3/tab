@@ -2,25 +2,25 @@
   height: 100%;
   position: relative;
   display: flex;
+  /* Read by artwork/transition rules below so Settings' "Animation
+     intensity" dial scales motion without every rule needing its own
+     custom property wiring. */
+  --ws-music-motion: 1;
+  --ws-music-artwork-scale: 1;
 }
 
-.ws-music__empty[hidden],
+.ws-music__status[hidden],
 .ws-music__player[hidden] {
   display: none;
 }
 
-.ws-music__empty {
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--ws-space-2);
-  color: var(--ws-color-text-tertiary);
-  font-size: var(--ws-text-sm);
-}
-
-.ws-music__empty:hover {
-  color: var(--ws-color-text-primary);
+/* Reuses the shared .ws-empty-state look (icon plate + title + hint) that
+   every other "nothing here yet" surface in the app uses — the Media Hub's
+   disconnected/loading/error states belong to the same family instead of
+   inventing their own placeholder style. */
+.ws-music__status {
+  width: 100%;
+  text-align: center;
 }
 
 .ws-music__player {
@@ -48,13 +48,61 @@
   background-position: center;
   opacity: 0.16;
   border-radius: inherit;
-  transform: scale(1.02);
-  transition: opacity var(--ws-duration-slow) var(--ws-ease-standard), transform 6s var(--ws-ease-standard);
+  transform: scale(calc(1 + 0.02 * var(--ws-music-motion)));
+  transition: opacity calc(var(--ws-duration-slow) * var(--ws-music-motion, 1)) var(--ws-ease-standard),
+    transform calc(6s * var(--ws-music-motion, 1)) var(--ws-ease-standard);
 }
 
-.ws-music__player.is-playing .ws-music__artwork {
-  opacity: 0.24;
-  transform: scale(1.08);
+.ws-music.is-playing .ws-music__artwork {
+  opacity: calc(0.16 + 0.08 * var(--ws-music-motion));
+  transform: scale(calc(1 + 0.08 * var(--ws-music-motion)));
+}
+
+.ws-music.is-loading .ws-music__artwork {
+  animation: ws-music-loading-pulse calc(1.6s / max(var(--ws-music-motion), 0.4)) var(--ws-ease-standard) infinite;
+}
+
+@keyframes ws-music-loading-pulse {
+  0%,
+  100% {
+    opacity: 0.16;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.ws-music__badge {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-1);
+  margin-bottom: var(--ws-space-1);
+}
+
+.ws-music__badge[hidden] {
+  display: none;
+}
+
+.ws-music__provider-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ws-color-success);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ws-color-success) 20%, transparent);
+}
+
+.ws-music.is-error .ws-music__provider-dot {
+  background: var(--ws-color-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ws-color-danger) 20%, transparent);
+}
+
+.ws-music__provider-label {
+  font-size: var(--ws-text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ws-color-text-tertiary);
 }
 
 .ws-music__meta {
@@ -73,6 +121,10 @@
   color: var(--ws-color-text-secondary);
 }
 
+.ws-music__artist--error {
+  color: var(--ws-color-danger);
+}
+
 .ws-music__fade {
   transition: opacity var(--ws-duration-base) var(--ws-ease-standard), transform var(--ws-duration-base) var(--ws-ease-standard);
 }
@@ -89,6 +141,15 @@
   border-radius: var(--ws-radius-pill);
   background: color-mix(in srgb, var(--ws-color-text-primary) 16%, transparent);
   cursor: pointer;
+}
+
+.ws-music__progress-track[hidden] {
+  display: none;
+}
+
+.ws-music__progress-track.is-disabled {
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .ws-music__progress-fill {
@@ -123,12 +184,22 @@
   gap: var(--ws-space-3);
 }
 
+.ws-music__transport[hidden] {
+  display: none;
+}
+
 .ws-music__play,
 .ws-music__skip {
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--ws-color-text-primary);
+}
+
+.ws-music__play:disabled,
+.ws-music__skip:disabled {
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 .ws-music__skip:hover {
@@ -152,4 +223,104 @@
 .ws-music__volume {
   margin-left: auto;
   width: 64px;
+}
+
+/* Auto-hide: controls recede to a quiet, mostly-transparent state until
+   the widget is hovered/focused — same "chrome fades, content stays"
+   pattern video players use, kept here behind a setting since it's a
+   deliberately different interaction model than the default (always
+   visible) one. */
+.ws-music--auto-hide .ws-music__meta,
+.ws-music--auto-hide .ws-music__progress-track,
+.ws-music--auto-hide .ws-music__transport {
+  opacity: 0;
+  transition: opacity var(--ws-duration-slow) var(--ws-ease-standard);
+}
+
+.ws-music--auto-hide:hover .ws-music__meta,
+.ws-music--auto-hide:hover .ws-music__progress-track,
+.ws-music--auto-hide:hover .ws-music__transport,
+.ws-music--auto-hide:focus-within .ws-music__meta,
+.ws-music--auto-hide:focus-within .ws-music__progress-track,
+.ws-music--auto-hide:focus-within .ws-music__transport {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* Compact layout — a mini-player bar: small artwork, single-line meta,   */
+/* tiny controls, no timeline. Expanded (the default, styled above with   */
+/* no attribute qualifier) stays the large hero layout.                   */
+/* ------------------------------------------------------------------ */
+.ws-music[data-layout='compact'] .ws-music__player {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: var(--ws-space-3);
+  gap: var(--ws-space-3);
+}
+
+.ws-music[data-layout='compact'] .ws-music__artwork {
+  position: relative;
+  inset: auto;
+  width: calc(40px * var(--ws-music-artwork-scale, 1));
+  height: calc(40px * var(--ws-music-artwork-scale, 1));
+  flex-shrink: 0;
+  border-radius: var(--ws-radius-sm);
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+.ws-music[data-layout='compact'].is-playing .ws-music__artwork {
+  opacity: 1;
+  transform: none;
+}
+
+.ws-music[data-layout='compact'] .ws-music__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.ws-music[data-layout='compact'] .ws-music__title,
+.ws-music[data-layout='compact'] .ws-music__artist {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ws-music[data-layout='compact'] .ws-music__progress-track {
+  display: none;
+}
+
+.ws-music[data-layout='compact'] .ws-music__transport {
+  gap: var(--ws-space-2);
+}
+
+.ws-music[data-layout='compact'] .ws-music__play {
+  width: 28px;
+  height: 28px;
+}
+
+.ws-music[data-layout='compact'] .ws-music__volume {
+  display: none;
+}
+
+.ws-music[data-layout='compact'] .ws-music__visualizer {
+  inset: auto;
+  right: var(--ws-space-3);
+  bottom: var(--ws-space-3);
+  width: 48px;
+  height: 24px;
+}
+
+/* The Settings "animation intensity" dial only scales motion — it never
+   overrides the OS/app-level reduced-motion preference. Same pattern as
+   every other engine in the app: is-reduced-motion always wins. */
+html.is-reduced-motion .ws-music {
+  --ws-music-motion: 0;
+}
+
+html.is-reduced-motion .ws-music .ws-music__artwork {
+  animation: none;
+  transition: opacity var(--ws-duration-base) var(--ws-ease-standard);
 }

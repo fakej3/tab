@@ -1,7 +1,8 @@
-import { h } from '@core/dom/h';
-import type { Track } from './constants';
+import { h, clearChildren } from '@core/dom/h';
+import type { MediaLayout } from './constants';
+import type { MediaState, PlaybackStatus } from './types';
 
-export interface MusicViewCallbacks {
+export interface MediaViewCallbacks {
   onPickFiles(files: FileList): void;
   onPlayPause(): void;
   onSkip(direction: -1 | 1): void;
@@ -9,17 +10,30 @@ export interface MusicViewCallbacks {
   onVolumeChange(volume: number): void;
 }
 
-export interface MusicView {
+export interface MediaView {
   root: HTMLElement;
   canvas: HTMLCanvasElement;
-  showEmpty(): void;
-  showPlayer(track: Track): void;
-  setPlaying(playing: boolean): void;
-  setProgress(currentTime: number, duration: number): void;
+  render(state: MediaState): void;
+  setLayout(layout: MediaLayout): void;
+  setShowProviderName(show: boolean): void;
+  setShowTimeline(show: boolean): void;
+  setShowTransportControls(show: boolean): void;
+  setAutoHide(auto: boolean): void;
+  setArtworkScale(scale: number): void;
+  setMotionIntensity(intensity: number): void;
+  setVisualizerVisible(visible: boolean): void;
   setVolumeSlider(volume: number): void;
 }
 
-export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
+/**
+ * Purely a view over `MediaState` — it never asks which provider is active
+ * or why. `render()` is the one entry point: it reads `state.status` to
+ * decide whether to show the status screen (no track exists yet, in any of
+ * several flavors) or the player, and everything else follows from the
+ * unified model. A future provider changes what shows up here without this
+ * file changing at all.
+ */
+export function createMediaView(callbacks: MediaViewCallbacks): MediaView {
   const fileInput = h('input', {
     type: 'file',
     accept: 'audio/*',
@@ -32,29 +46,38 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
     }
   }) as HTMLInputElement;
 
-  const emptyIcon = musicNoteIcon();
-  emptyIcon.classList.add('ws-motion-breathe');
-  const emptyState = h('button', { class: 'ws-music__empty ws-motion-hover-lift', type: 'button', onclick: () => fileInput.click() }, [
-    emptyIcon,
-    h('span', {}, ['Add music'])
+  const statusIcon = h('div', { class: 'ws-empty-state__icon' });
+  const statusTitle = h('p', { class: 'ws-empty-state__title' });
+  const statusHint = h('p', { class: 'ws-empty-state__hint' });
+  const statusView = h('button', { class: 'ws-music__status ws-empty-state ws-motion-hover-lift', type: 'button' }, [
+    statusIcon,
+    statusTitle,
+    statusHint
   ]);
+  let statusClickable = false;
+  statusView.addEventListener('click', () => {
+    if (statusClickable) fileInput.click();
+  });
 
   const canvas = h('canvas', { class: 'ws-music__visualizer' }) as HTMLCanvasElement;
-
   const artwork = h('div', { class: 'ws-music__artwork' });
+
+  const providerDot = h('span', { class: 'ws-music__provider-dot' });
+  const providerLabel = h('span', { class: 'ws-music__provider-label' });
+  const badge = h('div', { class: 'ws-music__badge' }, [providerDot, providerLabel]);
+
   const title = h('div', { class: 'ws-music__title ws-music__fade' });
   const artist = h('div', { class: 'ws-music__artist ws-music__fade' });
+  const meta = h('div', { class: 'ws-music__meta' }, [badge, title, artist]);
 
-  const progressTrack = h('div', { class: 'ws-music__progress-track' });
   const progressFill = h('div', { class: 'ws-music__progress-fill' });
   const progressKnob = h('div', { class: 'ws-music__progress-knob' });
-  progressTrack.append(progressFill, progressKnob);
+  const progressTrack = h('div', { class: 'ws-music__progress-track' }, [progressFill, progressKnob]);
   progressTrack.addEventListener('click', (event) => {
     const rect = progressTrack.getBoundingClientRect();
     callbacks.onSeek((event.clientX - rect.left) / rect.width);
   });
 
-  const playIcon = () => (playPauseBtn.dataset.playing === 'true' ? pauseSvg() : playSvg());
   const playPauseBtn = h('button', {
     class: 'ws-music__play ws-motion-press',
     type: 'button',
@@ -96,28 +119,37 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
   }
 
   const transport = h('div', { class: 'ws-music__transport' }, [prevBtn, playPauseBtn, nextBtn, volumeSlider]);
-  const meta = h('div', { class: 'ws-music__meta' }, [title, artist]);
   const player = h('div', { class: 'ws-music__player', hidden: true }, [canvas, artwork, meta, progressTrack, transport]);
 
-  const root = h('div', { class: 'ws-music' }, [emptyState, player, fileInput]);
+  const root = h('div', { class: 'ws-music', 'data-layout': 'expanded' }, [statusView, player, fileInput]);
 
   let lastTrackId: string | null = null;
 
-  function showEmpty(): void {
-    emptyState.hidden = false;
-    player.hidden = true;
+  function playIcon(playing: boolean): SVGSVGElement {
+    return playing ? pauseSvg() : playSvg();
   }
 
-  function showPlayer(track: Track): void {
-    emptyState.hidden = true;
-    player.hidden = false;
+  function render(state: MediaState): void {
+    const hasTrack = state.track !== null;
+    statusView.hidden = hasTrack;
+    player.hidden = !hasTrack;
+
+    if (!hasTrack) {
+      renderStatus(state.status);
+      return;
+    }
+
+    const track = state.track!;
     artwork.style.backgroundImage = track.artworkUrl ? `url(${track.artworkUrl})` : 'none';
+    root.classList.toggle('is-loading', state.status === 'loading');
+    root.classList.toggle('is-error', state.status === 'error');
 
     const changed = track.id !== lastTrackId;
     lastTrackId = track.id;
     const paint = () => {
       title.textContent = track.title;
-      artist.textContent = track.artist;
+      artist.textContent = state.status === 'error' ? (state.errorMessage ?? 'Playback error') : track.artist;
+      artist.classList.toggle('ws-music__artist--error', state.status === 'error');
     };
     if (changed) {
       title.classList.add('is-fading');
@@ -130,26 +162,66 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
     } else {
       paint();
     }
-  }
 
-  function setPlaying(playing: boolean): void {
-    playPauseBtn.dataset.playing = String(playing);
-    playPauseBtn.replaceChildren(playIcon());
-    player.classList.toggle('is-playing', playing);
-  }
+    providerLabel.textContent = state.providerName;
+    root.classList.toggle('is-playing', state.status === 'playing');
+    playPauseBtn.replaceChildren(playIcon(state.status === 'playing'));
+    playPauseBtn.disabled = !state.capabilities.play && !state.capabilities.pause;
+    prevBtn.disabled = !state.capabilities.previous;
+    nextBtn.disabled = !state.capabilities.next;
+    progressTrack.classList.toggle('is-disabled', !state.capabilities.seek);
 
-  function setProgress(currentTime: number, duration: number): void {
-    const ratio = duration > 0 ? currentTime / duration : 0;
+    const ratio = track.duration > 0 ? state.position / track.duration : 0;
     progressFill.style.width = `${ratio * 100}%`;
     progressKnob.style.left = `${ratio * 100}%`;
   }
 
-  function setVolumeSlider(volume: number): void {
-    volumeSlider.value = String(volume);
-    updateVolumeFill(volumeSlider);
+  function renderStatus(status: PlaybackStatus): void {
+    statusClickable = status === 'idle';
+    statusView.classList.toggle('ws-motion-hover-lift', statusClickable);
+    statusView.disabled = !statusClickable;
+
+    const copy = STATUS_COPY[status];
+    clearChildren(statusIcon);
+    statusIcon.append(copy.icon());
+    statusIcon.classList.toggle('ws-motion-breathe', status === 'idle' || status === 'connecting' || status === 'loading');
+    statusTitle.textContent = copy.title;
+    statusHint.textContent = copy.hint;
   }
 
-  return { root, canvas, showEmpty, showPlayer, setPlaying, setProgress, setVolumeSlider };
+  return {
+    root,
+    canvas,
+    render,
+    setLayout(layout) {
+      root.dataset.layout = layout;
+    },
+    setShowProviderName(show) {
+      badge.hidden = !show;
+    },
+    setShowTimeline(show) {
+      progressTrack.hidden = !show;
+    },
+    setShowTransportControls(show) {
+      transport.hidden = !show;
+    },
+    setAutoHide(auto) {
+      root.classList.toggle('ws-music--auto-hide', auto);
+    },
+    setArtworkScale(scale) {
+      root.style.setProperty('--ws-music-artwork-scale', String(scale));
+    },
+    setMotionIntensity(intensity) {
+      root.style.setProperty('--ws-music-motion', String(intensity));
+    },
+    setVisualizerVisible(visible) {
+      canvas.style.display = visible ? '' : 'none';
+    },
+    setVolumeSlider(volume) {
+      volumeSlider.value = String(volume);
+      updateVolumeFill(volumeSlider);
+    }
+  };
 }
 
 // Sizes mirror the shared icon scale (core/dom/icons.ts): 18 ("medium") for
@@ -177,4 +249,45 @@ const pauseSvg = () => svg([{ d: 'M6 5h4v14H6zM14 5h4v14h-4z' }]);
 const skipSvg = (back: boolean) =>
   svg([{ d: back ? 'M6 6h2v12H6zM20 6L10 12l10 6z' : 'M16 6h2v12h-2zM4 6l10 6-10 6z' }], 14);
 const musicNoteIcon = () =>
-  svg([{ d: 'M9 18V5l12-2v13' }, { tag: 'circle', attrs: { cx: '6', cy: '18', r: '3' } }, { tag: 'circle', attrs: { cx: '18', cy: '16', r: '3' } }], 24);
+  svg(
+    [{ d: 'M9 18V5l12-2v13' }, { tag: 'circle', attrs: { cx: '6', cy: '18', r: '3' } }, { tag: 'circle', attrs: { cx: '18', cy: '16', r: '3' } }],
+    24
+  );
+const plugIcon = () =>
+  svg(
+    [
+      { tag: 'path', attrs: { d: 'M9 2v6M15 2v6', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round' } },
+      { tag: 'path', attrs: { d: 'M6 8h12v4a6 6 0 01-12 0z', fill: 'none', stroke: 'currentColor', 'stroke-width': '2' } },
+      { tag: 'path', attrs: { d: 'M12 18v4', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round' } }
+    ],
+    24
+  );
+const connectingIcon = () =>
+  svg(
+    [
+      { tag: 'circle', attrs: { cx: '12', cy: '12', r: '8', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-dasharray': '10 8' } }
+    ],
+    24
+  );
+const errorIcon = () =>
+  svg(
+    [
+      {
+        tag: 'path',
+        attrs: { d: 'M12 8v5M12 17h.01', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round' }
+      },
+      { tag: 'circle', attrs: { cx: '12', cy: '12', r: '9', fill: 'none', stroke: 'currentColor', 'stroke-width': '2' } }
+    ],
+    24
+  );
+
+const STATUS_COPY: Record<PlaybackStatus, { icon: () => SVGSVGElement; title: string; hint: string }> = {
+  idle: { icon: musicNoteIcon, title: 'Add music', hint: 'Pick local audio files to start playing.' },
+  'no-provider': { icon: plugIcon, title: 'No source connected', hint: 'Enable a media source from Settings → Media Hub.' },
+  unsupported: { icon: plugIcon, title: 'Not available here', hint: 'This source isn’t supported in this browser yet.' },
+  connecting: { icon: connectingIcon, title: 'Connecting…', hint: 'Waiting for the source to respond.' },
+  loading: { icon: connectingIcon, title: 'Loading…', hint: 'Preparing the track.' },
+  playing: { icon: musicNoteIcon, title: '', hint: '' },
+  paused: { icon: musicNoteIcon, title: '', hint: '' },
+  error: { icon: errorIcon, title: 'Something went wrong', hint: 'That track could not be played.' }
+};

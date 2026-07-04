@@ -9,9 +9,9 @@ export function createMusicPlugin(): Plugin {
 
   return {
     id: MUSIC_PLUGIN_ID,
-    name: 'Music',
-    version: '1.0.0',
-    description: 'A minimal local audio player with a configurable visualizer and Media Session integration.',
+    name: 'Media Hub',
+    version: '2.0.0',
+    description: 'A provider-based media player — local files today, pluggable sources tomorrow — with a configurable visualizer and OS Media Session integration.',
     widget: {
       defaultSize: { w: 5, h: 4 },
       minSize: { w: 3, h: 3 },
