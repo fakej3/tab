@@ -140,9 +140,20 @@
   /* Layering                                                          */
   /* ---------------------------------------------------------------- */
   --ws-z-wallpaper: 0;
+  --ws-z-ambient-glow: 5;
   --ws-z-layout: 10;
   --ws-z-chrome: 20;
   --ws-z-palette: 40;
   --ws-z-panel: 50;
   --ws-z-toast: 60;
+  --ws-z-grain: 70;
+
+  /* ---------------------------------------------------------------- */
+  /* Signature surface treatment                                      */
+  /* ---------------------------------------------------------------- */
+  /* A faint accent-colored rim light along the top edge of every glass
+     surface — the one visual detail every surface in the app shares, and
+     the thing that should read as "this app" even in a cropped
+     screenshot. Intensity is user-adjustable (theme settings). */
+  --ws-edge-light-opacity: 0.35;
 }

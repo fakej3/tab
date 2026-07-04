@@ -8,6 +8,7 @@ export interface ClockState {
   style: ClockStyle;
   sizeScale: number;
   uppercaseDate: boolean;
+  pulseSeconds: boolean;
 }
 
 export interface ClockView {
@@ -24,7 +25,7 @@ export function createClockView(): ClockView {
     root.dataset.style = state.style;
     root.style.setProperty('--ws-clock-scale', String(state.sizeScale));
 
-    timeEl.textContent = formatTime(now, state);
+    timeEl.replaceChildren(...renderTimeParts(now, state));
     dateEl.hidden = !state.showDate;
     dateEl.textContent = state.showDate ? formatDate(now, state) : '';
   }
@@ -32,14 +33,29 @@ export function createClockView(): ClockView {
   return { root, update };
 }
 
-function formatTime(date: Date, state: ClockState): string {
+/**
+ * Builds the time as separate nodes (via `formatToParts`, not a plain
+ * string) specifically so the ":" separator can be its own element — a
+ * fresh element every tick, so its pulse animation (see clock/styles.css)
+ * replays once per second for free, no manual restart needed. This is the
+ * clock's one signature detail: a quiet heartbeat instead of a static
+ * readout.
+ */
+function renderTimeParts(date: Date, state: ClockState): (string | Node)[] {
   const options: Intl.DateTimeFormatOptions = {
     hour: 'numeric',
     minute: '2-digit',
     hour12: !state.use24Hour
   };
   if (state.showSeconds) options.second = '2-digit';
-  return new Intl.DateTimeFormat(undefined, options).format(date);
+
+  const parts = new Intl.DateTimeFormat(undefined, options).formatToParts(date);
+  return parts.map((part) => {
+    if (part.type === 'literal' && part.value === ':') {
+      return h('span', { class: `ws-clock__colon${state.pulseSeconds ? ' is-pulsing' : ''}` }, [':']);
+    }
+    return part.value;
+  });
 }
 
 function formatDate(date: Date, state: ClockState): string {

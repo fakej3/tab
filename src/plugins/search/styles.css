@@ -3,6 +3,16 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  transform: scale(1);
+  transition: transform var(--ws-duration-slow) var(--ws-ease-standard);
+}
+
+/* The emotional center of the interface gets the one deliberately
+   noticeable focus treatment in the whole app: a faint grow, on top of
+   the shared .ws-motion-focus-glow ring every focusable glass surface
+   already gets. */
+.ws-search:focus-within {
+  transform: scale(1.006);
 }
 
 .ws-search__row {
@@ -38,28 +48,49 @@
   color: var(--ws-color-text-tertiary);
 }
 
-.ws-search__hint {
+.ws-search__hint,
+.ws-search__result {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 0;
+  padding: var(--ws-space-1) 0;
+  opacity: 0;
+  transform: scale(0.92);
+  border-radius: var(--ws-radius-pill);
+  transition:
+    max-width var(--ws-duration-base) var(--ws-ease-standard),
+    padding var(--ws-duration-base) var(--ws-ease-standard),
+    opacity var(--ws-duration-fast) var(--ws-ease-standard),
+    transform var(--ws-duration-fast) var(--ws-ease-standard),
+    background var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-search__hint.is-visible,
+.ws-search__result.is-visible {
+  max-width: 220px;
+  padding: var(--ws-space-1) var(--ws-space-3);
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ws-search__hint {
   font-size: var(--ws-text-xs);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--ws-color-accent);
-  padding: var(--ws-space-1) var(--ws-space-2);
-  border-radius: var(--ws-radius-pill);
   background: color-mix(in srgb, var(--ws-color-accent) 16%, transparent);
 }
 
 .ws-search__result {
-  flex-shrink: 0;
   font-size: var(--ws-text-sm);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
   color: var(--ws-color-text-primary);
-  padding: var(--ws-space-1) var(--ws-space-3);
-  border-radius: var(--ws-radius-pill);
   background: color-mix(in srgb, var(--ws-color-success) 18%, transparent);
-  transition: background var(--ws-duration-fast) var(--ws-ease-standard);
 }
 
 .ws-search__result.is-copied {
@@ -67,6 +98,17 @@
   color: var(--ws-color-accent);
 }
 
+/* Positioning/elevation on top of the shared .ws-glass look, but with a
+   fully opaque fill rather than the usual translucent one. Unlike a
+   stationary glass panel, this one floats directly over whatever widget
+   happens to sit below the search bar, and backdrop-filter cannot be
+   trusted to obscure a sibling widget's content underneath it (verified:
+   even at maximum z-index/stacking, any remaining transparency lets the
+   widget below show through as a legible ghost — the backdrop blur only
+   reliably reaches content within its own stacking context, not a
+   separately-composited sibling widget, so unblurred sharp text bleeds
+   through at whatever contrast the transparency leaves). Opaque is the
+   only fill that's reliably correct here. */
 .ws-search__recent {
   position: absolute;
   top: calc(100% + var(--ws-space-2));
@@ -76,13 +118,19 @@
   flex-direction: column;
   gap: 2px;
   padding: var(--ws-space-2);
-  border-radius: var(--ws-radius-md);
-  background: var(--ws-surface-fill-raised);
+  background: var(--ws-color-surface);
   border: 1px solid var(--ws-surface-border-color);
-  backdrop-filter: blur(var(--ws-blur-md));
-  -webkit-backdrop-filter: blur(var(--ws-blur-md));
-  box-shadow: var(--ws-elevation-3);
+  border-radius: var(--ws-radius-md);
+  box-shadow: var(--ws-elevation-2);
   z-index: 1;
+}
+
+/* Author `display` rules beat the UA [hidden]{display:none} stylesheet
+   regardless of specificity, so the unconditional `display: flex` above
+   would otherwise keep this panel visibly rendered (as an empty glass bar)
+   even while the `hidden` attribute is set. */
+.ws-search__recent[hidden] {
+  display: none;
 }
 
 .ws-search__recent-item {

@@ -9,6 +9,8 @@ export interface ExtractedPalette {
   dominant: string;
   average: string;
   isDark: boolean;
+  /** Relative luminance of the average color, 0 (black) to 1 (white). */
+  luminance: number;
 }
 
 export async function extractPaletteFromImage(source: HTMLImageElement | ImageBitmap): Promise<ExtractedPalette> {
@@ -51,7 +53,7 @@ export async function extractPaletteFromImage(source: HTMLImageElement | ImageBi
   }
 
   if (count === 0) {
-    return { dominant: '#8b7cf6', average: '#8b7cf6', isDark: true };
+    return { dominant: '#8b7cf6', average: '#8b7cf6', isDark: true, luminance: 0.2 };
   }
 
   const average: [number, number, number] = [r / count, g / count, b / count];
@@ -69,7 +71,8 @@ export async function extractPaletteFromImage(source: HTMLImageElement | ImageBi
   return {
     dominant: rgbToHex(dominant),
     average: rgbToHex(average),
-    isDark: luminance < 0.5
+    isDark: luminance < 0.5,
+    luminance
   };
 }
 

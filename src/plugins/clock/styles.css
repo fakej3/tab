@@ -27,6 +27,32 @@
   color: var(--ws-color-text-secondary);
 }
 
+/* The clock's signature detail: the colon quietly pulses once a second,
+   like a heartbeat, rather than sitting static. A fresh element every tick
+   (see view.ts) replays this automatically — no JS animation restart. */
+.ws-clock__colon {
+  display: inline-block;
+}
+
+.ws-clock__colon.is-pulsing {
+  animation: ws-clock-colon-pulse 550ms var(--ws-ease-standard);
+}
+
+@keyframes ws-clock-colon-pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  40% {
+    opacity: 0.35;
+    transform: scale(0.86);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* Explicit style overrides — a deliberate departure from whatever the
    global Typography preset says, for users who want the clock specifically
    to read differently from the rest of the workspace. "Auto" (the default)

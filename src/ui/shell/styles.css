@@ -14,6 +14,12 @@
   background: var(--ws-color-background);
 }
 
+.ws-ambience {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .ws-wallpaper-layer {
   position: absolute;
   inset: 0;
@@ -26,6 +32,25 @@
   opacity: 1;
 }
 
+/* Gentle breathing — a slow, barely-perceptible scale pulse so the
+   wallpaper reads as alive rather than a static screenshot. Deliberately
+   tiny (1.5%) and slow (18s) so it never registers as "animation," only as
+   ambience. Transform-only, so it's effectively free on the compositor. */
+.ws-wallpaper-layer.is-breathing {
+  animation: ws-wallpaper-breathe 18s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes ws-wallpaper-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.015);
+  }
+}
+
 /* Dims and softens the wallpaper very slightly while an overlay (palette,
    settings) has focus — a cheap, effective way to direct attention without
    touching the overlay's own styling. */
@@ -33,15 +58,50 @@
   filter: brightness(0.82) saturate(0.92);
 }
 
-.ws-wallpaper-image {
+/* A lighter touch than .is-dimmed — used while the search bar has focus,
+   so typing feels like it draws a soft spotlight rather than opening a
+   modal. */
+.ws-wallpaper.is-focus-dimmed .ws-wallpaper-layer {
+  filter: brightness(0.92);
+}
+
+/* Automatic readability scrim — invisible on already-dark photos, fades in
+   proportionally to how bright the active image actually is. */
+.ws-wallpaper-auto-scrim {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  transition: opacity var(--ws-duration-slow) var(--ws-ease-standard);
+}
+
+/* Cinematic mode — a soft vignette, like a photograph rather than a
+   screen. Purely decorative, disabled by default. */
+.ws-wallpaper-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgb(0 0 0 / 0.35) 100%);
+}
+
+/* Overscan wrapper (plain div, no intrinsic ratio) that gives the parallax
+   transform room to shift the image without ever exposing an edge. */
+.ws-wallpaper-image-frame {
   position: absolute;
   inset: -6%;
   width: 112%;
   height: 112%;
-  object-fit: cover;
   transform: translate3d(var(--ws-parallax-x, 0px), var(--ws-parallax-y, 0px), 0);
-  transition: filter var(--ws-duration-slow) var(--ws-ease-standard), transform 700ms var(--ws-ease-standard);
+  transition: transform 700ms var(--ws-ease-standard);
   will-change: transform;
+  overflow: hidden;
+}
+
+.ws-wallpaper-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter var(--ws-duration-slow) var(--ws-ease-standard);
 }
 
 .ws-wallpaper-tint {

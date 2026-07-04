@@ -1,0 +1,82 @@
+/* Ambient cursor glow — sits between the wallpaper and the widgets, like a
+   soft light source in the room. The lag between cursor and glow (a slow
+   CSS transition on transform, not a 1:1 follow) is what makes it read as
+   "atmosphere" rather than a cursor trail. */
+.ws-ambient-glow {
+  position: absolute;
+  inset: 0;
+  z-index: var(--ws-z-ambient-glow);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.ws-ambient-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 900px;
+  height: 900px;
+  margin: -450px 0 0 -450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(from var(--ws-color-accent) r g b / var(--ws-glow-opacity, 0.3)) 0%, transparent 70%);
+  transform: translate(var(--ws-glow-x, 50vw), var(--ws-glow-y, 50vh));
+  will-change: transform;
+  filter: blur(40px);
+  opacity: 0;
+  transition: transform 900ms var(--ws-ease-standard), opacity 600ms var(--ws-ease-standard);
+}
+
+.ws-ambient-glow.is-active::before {
+  opacity: 1;
+}
+
+/* Film grain — sits above every other layer including chrome, like a
+   screen overlay, and unifies the whole composition into one image. */
+.ws-ambient-grain {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ws-z-grain);
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 140px 140px;
+  mix-blend-mode: overlay;
+  opacity: 0;
+  transition: opacity 600ms var(--ws-ease-standard);
+}
+
+.ws-ambient-grain.is-active {
+  opacity: var(--ws-grain-opacity, 0.03);
+}
+
+.ws-ambient-grain.is-animated {
+  animation: ws-grain-flicker 700ms steps(4) infinite;
+}
+
+@keyframes ws-grain-flicker {
+  0% {
+    background-position: 0 0;
+  }
+  25% {
+    background-position: 20px -10px;
+  }
+  50% {
+    background-position: -15px 15px;
+  }
+  75% {
+    background-position: 10px 20px;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-ambient-glow::before {
+    transition: opacity 600ms var(--ws-ease-standard);
+  }
+
+  .ws-ambient-grain.is-animated {
+    animation: none;
+  }
+}

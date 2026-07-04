@@ -14,7 +14,8 @@ export const VISUALIZER_TYPES = [
   { label: 'Minimal Line', value: 'line' },
   { label: 'Dots', value: 'dots' },
   { label: 'Circular', value: 'circular' },
-  { label: 'Breathing', value: 'breathing' }
+  { label: 'Breathing', value: 'breathing' },
+  { label: 'Aura', value: 'aura' }
 ] as const;
 
 export type VisualizerType = (typeof VISUALIZER_TYPES)[number]['value'];

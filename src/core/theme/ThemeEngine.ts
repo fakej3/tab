@@ -60,6 +60,16 @@ const THEME_SECTION: SettingsSection = {
       min: 0,
       max: 1,
       step: 0.01
+    },
+    {
+      key: 'edgeLight',
+      type: 'range',
+      label: 'Glass edge light',
+      description: 'The signature accent-tinted rim light along the top edge of every glass surface.',
+      default: DEFAULT_TOKENS.edgeLight,
+      min: 0,
+      max: 1,
+      step: 0.01
     }
   ]
 };
@@ -78,7 +88,8 @@ const PRESET_SEEDED_KEYS: (keyof ThemeTokens)[] = [
   'radius',
   'glassBlur',
   'glassOpacity',
-  'shadowIntensity'
+  'shadowIntensity',
+  'edgeLight'
 ];
 
 export class ThemeEngine {
@@ -124,7 +135,8 @@ export class ThemeEngine {
       radius: (values.radius as number) ?? preset.tokens.radius,
       glassBlur: (values.glassBlur as number) ?? preset.tokens.glassBlur,
       glassOpacity: (values.glassOpacity as number) ?? preset.tokens.glassOpacity,
-      shadowIntensity: (values.shadowIntensity as number) ?? preset.tokens.shadowIntensity
+      shadowIntensity: (values.shadowIntensity as number) ?? preset.tokens.shadowIntensity,
+      edgeLight: (values.edgeLight as number) ?? preset.tokens.edgeLight
     };
 
     this.applyTokens(tokens);

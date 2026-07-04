@@ -24,6 +24,8 @@ export interface ThemeTokens {
   glassOpacity: number;
   /** Multiplier (0-1) controlling drop-shadow strength across the UI. */
   shadowIntensity: number;
+  /** Opacity (0-1) of the accent-tinted rim light along the top edge of every glass surface — the app's signature surface detail. */
+  edgeLight: number;
 }
 
 export const TOKEN_CSS_VARS: Record<keyof ThemeTokens, string> = {
@@ -41,7 +43,8 @@ export const TOKEN_CSS_VARS: Record<keyof ThemeTokens, string> = {
   radius: '--ws-radius-base',
   glassBlur: '--ws-glass-blur',
   glassOpacity: '--ws-glass-opacity',
-  shadowIntensity: '--ws-shadow-intensity'
+  shadowIntensity: '--ws-shadow-intensity',
+  edgeLight: '--ws-edge-light-opacity'
 };
 
 export const DEFAULT_TOKENS: ThemeTokens = {
@@ -59,7 +62,8 @@ export const DEFAULT_TOKENS: ThemeTokens = {
   radius: 20,
   glassBlur: 28,
   glassOpacity: 0.1,
-  shadowIntensity: 0.35
+  shadowIntensity: 0.35,
+  edgeLight: 0.35
 };
 
 export function tokenToCssValue(key: keyof ThemeTokens, value: ThemeTokens[keyof ThemeTokens]): string {
@@ -70,6 +74,7 @@ export function tokenToCssValue(key: keyof ThemeTokens, value: ThemeTokens[keyof
       return `${value}px`;
     case 'glassOpacity':
     case 'shadowIntensity':
+    case 'edgeLight':
       return `${value}`;
     default:
       return String(value);

@@ -5,6 +5,7 @@ import type { SettingsManager } from '@core/settings/SettingsManager';
 import type { SettingsSection } from '@core/settings/SettingsSchema';
 import type { StorageService } from '@core/storage/StorageService';
 import { StorageKeys } from '@core/storage/StorageKeys';
+import { extractPaletteFromImage } from '@core/theme/colorExtraction';
 import { clamp } from '@core/utils/clamp';
 import { createId } from '@core/utils/id';
 import { createLogger } from '@core/utils/logger';
@@ -32,9 +33,21 @@ const WALLPAPER_SECTION: SettingsSection = {
         { label: 'Image', value: 'image' }
       ]
     },
-    { key: 'color', type: 'color', label: 'Color', default: '#0b0b10' },
-    { key: 'gradientFrom', type: 'color', label: 'Gradient start', default: '#33245c' },
-    { key: 'gradientTo', type: 'color', label: 'Gradient end', default: '#0a0912' },
+    { key: 'color', type: 'color', label: 'Color', default: '#0b0b10', visibleWhen: (values) => values.mode === 'color' },
+    {
+      key: 'gradientFrom',
+      type: 'color',
+      label: 'Gradient start',
+      default: '#33245c',
+      visibleWhen: (values) => values.mode === 'gradient'
+    },
+    {
+      key: 'gradientTo',
+      type: 'color',
+      label: 'Gradient end',
+      default: '#0a0912',
+      visibleWhen: (values) => values.mode === 'gradient'
+    },
     {
       key: 'gradientAngle',
       type: 'range',
@@ -43,7 +56,8 @@ const WALLPAPER_SECTION: SettingsSection = {
       min: 0,
       max: 360,
       step: 1,
-      unit: '°'
+      unit: '°',
+      visibleWhen: (values) => values.mode === 'gradient'
     },
     { key: 'activeImageId', type: 'string', label: 'Active image', default: '', hiddenInPanel: true },
     {
@@ -90,6 +104,29 @@ const WALLPAPER_SECTION: SettingsSection = {
       label: 'Cursor parallax',
       description: 'A very subtle shift as the cursor moves. Off when reduced motion is on.',
       default: true
+    },
+    {
+      key: 'breathing',
+      type: 'boolean',
+      label: 'Gentle breathing',
+      description: 'A very slow, barely-perceptible scale pulse — the workspace feels alive rather than static.',
+      default: true
+    },
+    {
+      key: 'cinematic',
+      type: 'boolean',
+      label: 'Cinematic mode',
+      description: 'A soft vignette and a touch more contrast, like a photograph rather than a screen.',
+      default: false,
+      visibleWhen: (values) => values.mode === 'image'
+    },
+    {
+      key: 'autoReadability',
+      type: 'boolean',
+      label: 'Automatic readability',
+      description: 'Adds a barely-there dark scrim only when a bright image would make widget text hard to read.',
+      default: true,
+      visibleWhen: (values) => values.mode === 'image'
     }
   ]
 };
@@ -106,6 +143,9 @@ type WallpaperSettingsValues = {
   tintColor: string;
   tintOpacity: number;
   parallax: boolean;
+  breathing: boolean;
+  cinematic: boolean;
+  autoReadability: boolean;
 };
 
 /**
@@ -193,13 +233,15 @@ export class WallpaperEngine {
   }
 
   private async buildLayer(values: WallpaperSettingsValues): Promise<HTMLElement> {
+    const breathingClass = values.breathing ? ' is-breathing' : '';
+
     if (values.mode === 'color') {
-      return h('div', { class: 'ws-wallpaper-layer', style: `background:${values.color}` });
+      return h('div', { class: `ws-wallpaper-layer${breathingClass}`, style: `background:${values.color}` });
     }
 
     if (values.mode === 'gradient') {
       return h('div', {
-        class: 'ws-wallpaper-layer',
+        class: `ws-wallpaper-layer${breathingClass}`,
         style: `background:linear-gradient(${values.gradientAngle}deg, ${values.gradientFrom}, ${values.gradientTo})`
       });
     }
@@ -208,24 +250,51 @@ export class WallpaperEngine {
     if (!image) {
       log.warn('No wallpaper image available — falling back to gradient.');
       return h('div', {
-        class: 'ws-wallpaper-layer',
+        class: `ws-wallpaper-layer${breathingClass}`,
         style: `background:linear-gradient(${values.gradientAngle}deg, ${values.gradientFrom}, ${values.gradientTo})`
       });
     }
 
+    const cinematicFilter = values.cinematic ? ' contrast(1.08) saturate(1.12)' : '';
     const img = h('img', {
       class: 'ws-wallpaper-image',
       src: image.dataUrl,
       alt: '',
-      style: `filter:blur(${values.blur}px) brightness(${values.brightness})`
+      style: `filter:blur(${values.blur}px) brightness(${values.brightness})${cinematicFilter}`
     }) as HTMLImageElement;
     await decodeImage(img);
+
+    // The -6% overscan (room for parallax to shift without exposing an
+    // edge) lives on this wrapper, not the <img> itself: percentage
+    // width/height on a replaced element with `object-fit` resolves against
+    // its *intrinsic* aspect ratio in some browsers, not purely the
+    // containing block, which left a visible gap on one side for images
+    // whose aspect ratio didn't match the viewport. A plain div has no
+    // intrinsic ratio to fight with.
+    const imageFrame = h('div', { class: 'ws-wallpaper-image-frame' }, [img]);
 
     const tint = h('div', {
       class: 'ws-wallpaper-tint',
       style: `background:${values.tintColor};opacity:${values.tintOpacity}`
     });
-    return h('div', { class: 'ws-wallpaper-layer' }, [img, tint]);
+
+    const layerChildren: (Node | string)[] = [imageFrame, tint];
+
+    // Automatic readability: a bright image otherwise gives glass widgets
+    // nothing dark to sit on top of, regardless of theme. Scrim strength is
+    // proportional to how bright the image actually is, so it stays
+    // invisible on already-dark photos and only appears when needed.
+    if (values.autoReadability) {
+      const palette = await extractPaletteFromImage(img).catch(() => null);
+      if (palette && palette.luminance > 0.5) {
+        const scrimOpacity = clamp((palette.luminance - 0.5) * 0.7, 0, 0.35);
+        layerChildren.push(h('div', { class: 'ws-wallpaper-auto-scrim', style: `opacity:${scrimOpacity}` }));
+      }
+    }
+
+    if (values.cinematic) layerChildren.push(h('div', { class: 'ws-wallpaper-vignette' }));
+
+    return h('div', { class: `ws-wallpaper-layer${breathingClass}` }, layerChildren);
   }
 
   /** A very subtle cursor-follow shift — off entirely under reduced motion or when the user disables it. */

@@ -1,3 +1,4 @@
+import { AmbienceEngine } from '@core/ambience/AmbienceEngine';
 import { AnimationEngine } from '@core/animation/AnimationEngine';
 import { CommandPalette } from '@core/command-palette/CommandPalette';
 import { createEventBus, type EventBus } from '@core/event-bus/EventBus';
@@ -30,6 +31,7 @@ export class Application {
   readonly typography: TypographyEngine;
   readonly animation: AnimationEngine;
   readonly wallpaper: WallpaperEngine;
+  readonly ambience: AmbienceEngine;
   readonly layout: LayoutEngine;
   readonly plugins: PluginManager;
   readonly commandPalette: CommandPalette;
@@ -40,6 +42,7 @@ export class Application {
     this.typography = new TypographyEngine(this.settings, this.theme, this.bus);
     this.animation = new AnimationEngine(this.settings, this.theme, this.bus);
     this.wallpaper = new WallpaperEngine(this.settings, this.storage, this.bus);
+    this.ambience = new AmbienceEngine(this.settings, this.bus);
     this.layout = new LayoutEngine(this.storage, this.bus);
     this.commandPalette = new CommandPalette(this.bus);
     this.plugins = new PluginManager(this.bus, this.settings, this.storage, this.commandPalette);
@@ -51,6 +54,7 @@ export class Application {
     this.typography.init();
     this.animation.init();
     await this.wallpaper.init();
+    this.ambience.init();
     await this.layout.load();
     this.commandPalette.init();
 

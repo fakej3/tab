@@ -1,5 +1,6 @@
 import type { Application } from '@app/Application';
 import { h } from '@core/dom/h';
+import { icons } from '@core/dom/icons';
 import { gridRectToPixels, pixelsToGridDelta } from '@core/layout/grid';
 import type { WidgetLayout } from '@core/layout/LayoutTypes';
 
@@ -113,7 +114,7 @@ export class LayoutCanvas {
         title: widget.locked ? 'Unlock' : 'Lock',
         onclick: () => this.app.layout.toggleLock(widget.instanceId)
       },
-      [widget.locked ? '🔒' : '🔓']
+      [widget.locked ? icons.lock() : icons.unlock()]
     );
     const hideBtn = h(
       'button',
@@ -123,7 +124,7 @@ export class LayoutCanvas {
         title: widget.hidden ? 'Show' : 'Hide',
         onclick: () => this.app.layout.toggleHidden(widget.instanceId)
       },
-      [widget.hidden ? '🙈' : '👁']
+      [widget.hidden ? icons.eyeOff() : icons.eye()]
     );
     const controls = h('div', { class: 'ws-widget__controls' }, [lockBtn, hideBtn]);
 

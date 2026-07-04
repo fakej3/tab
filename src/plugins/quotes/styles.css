@@ -92,6 +92,14 @@
   margin-top: var(--ws-space-2);
 }
 
+/* Author `display` rules beat the UA [hidden]{display:none} stylesheet
+   regardless of specificity, so these need an explicit override or the
+   favorite button / add-quote form stay visible while `hidden`. */
+.ws-quotes__action[hidden],
+.ws-quotes__add[hidden] {
+  display: none;
+}
+
 .ws-quotes__add-input,
 .ws-quotes__add-author {
   background: transparent;

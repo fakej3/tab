@@ -14,14 +14,22 @@ body {
   transition: background-color var(--ws-duration-slow) var(--ws-ease-standard), color var(--ws-duration-slow) var(--ws-ease-standard);
 }
 
-/* Shared glass-surface utility every widget/panel opts into via this class. */
+/* Shared glass-surface utility every widget/panel opts into via this class.
+   The signature touch is the two inset shadows: a faint accent-tinted rim
+   light along the top edge (as if lit from above) and an equally faint
+   dark line along the bottom (as if catching a shadow) — the detail that
+   should read as "this app" even in a cropped screenshot, present on every
+   glass surface without exception. */
 .ws-glass {
   background: var(--ws-surface-fill);
   border: 1px solid var(--ws-surface-border-color);
   border-radius: var(--ws-radius-md);
   backdrop-filter: blur(var(--ws-blur-md));
   -webkit-backdrop-filter: blur(var(--ws-blur-md));
-  box-shadow: var(--ws-elevation-2);
+  box-shadow:
+    var(--ws-elevation-2),
+    inset 0 1px 0 0 rgb(from var(--ws-color-accent) r g b / var(--ws-edge-light-opacity)),
+    inset 0 -1px 0 0 rgb(0 0 0 / 0.08);
   transition:
     background-color var(--ws-duration-slow) var(--ws-ease-standard),
     border-color var(--ws-duration-slow) var(--ws-ease-standard),
@@ -119,10 +127,15 @@ body {
 }
 
 .ws-empty-state__icon {
-  font-size: var(--ws-text-xl);
+  display: flex;
   color: var(--ws-color-text-tertiary);
   margin-bottom: var(--ws-space-1);
   opacity: 0.8;
+}
+
+.ws-empty-state__icon svg {
+  width: var(--ws-icon-lg);
+  height: var(--ws-icon-lg);
 }
 
 .ws-empty-state__title {

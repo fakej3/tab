@@ -76,13 +76,13 @@ export function createSearchView(callbacks: SearchViewCallbacks): SearchView {
     setProviderHint(name) {
       if (hasInlineResult) return;
       hint.textContent = name ? `↵ ${name}` : '';
-      hint.hidden = !name;
+      revealPill(hint, Boolean(name));
     },
     setInlineResult(text) {
       hasInlineResult = Boolean(text);
       result.textContent = text ?? '';
-      result.hidden = !text;
-      hint.hidden = hasInlineResult || !hint.textContent;
+      revealPill(result, Boolean(text));
+      revealPill(hint, !hasInlineResult && Boolean(hint.textContent));
     },
     flashCopied() {
       result.classList.add('is-copied');
@@ -115,6 +115,11 @@ export function createSearchView(callbacks: SearchViewCallbacks): SearchView {
       else if (queries.length === 0) recentList.hidden = true;
     }
   };
+}
+
+/** Reveals/collapses a hint/result pill with a width+fade transition instead of the abrupt `hidden` attribute — these are plain spans (never focusable), so animating presence directly is safe. */
+function revealPill(el: HTMLElement, visible: boolean): void {
+  el.classList.toggle('is-visible', visible);
 }
 
 function searchIconSvg(): SVGSVGElement {

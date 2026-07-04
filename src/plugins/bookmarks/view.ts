@@ -1,4 +1,5 @@
 import { h } from '@core/dom/h';
+import { icons } from '@core/dom/icons';
 
 export interface BookmarkEntry {
   id: string;
@@ -40,7 +41,7 @@ export function createBookmarksView(): BookmarksView {
   function showMessage(message: string): void {
     list.replaceChildren(
       h('div', { class: 'ws-empty-state' }, [
-        h('div', { class: 'ws-empty-state__icon' }, ['☆']),
+        h('div', { class: 'ws-empty-state__icon' }, [icons.bookmark()]),
         h('p', { class: 'ws-empty-state__title' }, [message])
       ])
     );

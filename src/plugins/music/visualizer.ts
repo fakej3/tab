@@ -93,6 +93,7 @@ export class Visualizer {
     else if (config.type === 'line') this.drawLine(width, height);
     else if (config.type === 'dots') this.drawDots(width, height);
     else if (config.type === 'breathing') this.drawBreathing(width, height);
+    else if (config.type === 'aura') this.drawAura(width, height);
     else this.drawCircular(width, height);
 
     ctx.globalAlpha = 1;
@@ -178,6 +179,33 @@ export class Visualizer {
       else this.ctx.lineTo(x, y);
     });
     this.ctx.stroke();
+  }
+
+  /**
+   * The signature visualizer — a soft glowing blob that swells with bass
+   * energy, deliberately reusing the same radial-glow language as the
+   * ambient cursor glow elsewhere in the app (see core/ambience) so the
+   * whole product reads as one visual system rather than a collection of
+   * independently-designed pieces.
+   */
+  private drawAura(width: number, height: number): void {
+    const bassBinCount = Math.max(1, Math.floor(this.smoothed.length * 0.12));
+    let bass = 0;
+    for (let i = 0; i < bassBinCount; i += 1) bass += this.smoothed[i] ?? 0;
+    bass /= bassBinCount;
+
+    const cx = width / 2;
+    const cy = height / 2;
+    const baseRadius = Math.min(width, height) * 0.2;
+    const radius = baseRadius + bass * Math.min(width, height) * 0.32;
+
+    const gradient = this.ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(1, radius));
+    gradient.addColorStop(0, this.config.color);
+    gradient.addColorStop(1, 'transparent');
+    this.ctx.fillStyle = gradient;
+    this.ctx.beginPath();
+    this.ctx.arc(cx, cy, Math.max(1, radius), 0, Math.PI * 2);
+    this.ctx.fill();
   }
 
   private drawCircular(width: number, height: number): void {

@@ -23,6 +23,8 @@ export class SearchController {
       onPickRecent: (query) => this.submit(query)
     });
     this.view.input.addEventListener('input', () => this.updateHint());
+    this.view.input.addEventListener('focus', () => this.context.bus.emit('search:focus', undefined));
+    this.view.input.addEventListener('blur', () => this.context.bus.emit('search:blur', undefined));
     container.append(this.view.root);
     this.applySettings();
     this.view.setRecent(this.recent);

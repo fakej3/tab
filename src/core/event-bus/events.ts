@@ -29,6 +29,8 @@ export interface WorkspaceEvents {
   'settings-panel:close': void;
 
   'search:submit': { query: string; providerId: string };
+  'search:focus': void;
+  'search:blur': void;
 
   'music:track-changed': { title: string; artist?: string; artworkUrl?: string };
   'music:playback-changed': { playing: boolean };

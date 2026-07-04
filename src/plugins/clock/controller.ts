@@ -32,7 +32,8 @@ export class ClockController {
       showDate: this.context.settings.get('showDate'),
       style: this.context.settings.get('style'),
       sizeScale: this.context.settings.get('sizeScale'),
-      uppercaseDate: this.context.settings.get('uppercaseDate')
+      uppercaseDate: this.context.settings.get('uppercaseDate'),
+      pulseSeconds: this.context.settings.get('pulseSeconds')
     };
   }
 
@@ -42,8 +43,11 @@ export class ClockController {
     const now = new Date();
     this.view.update(now, state);
 
+    // Always aligned to the next second boundary — even when seconds aren't
+    // displayed, the signature colon pulse (see view.ts) still needs a
+    // once-a-second heartbeat, and re-formatting a date string every second
+    // is negligible cost.
     if (this.timerId) clearTimeout(this.timerId);
-    const msToNextTick = state.showSeconds ? 1000 - now.getMilliseconds() : 60000 - (now.getSeconds() * 1000 + now.getMilliseconds());
-    this.timerId = setTimeout(this.tick, msToNextTick);
+    this.timerId = setTimeout(this.tick, 1000 - now.getMilliseconds());
   };
 }

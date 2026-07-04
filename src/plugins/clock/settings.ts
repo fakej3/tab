@@ -17,6 +17,13 @@ export const CLOCK_SETTINGS: Omit<SettingsSection, 'namespace'> = {
       options: CLOCK_STYLES.map((style) => ({ label: style.label, value: style.value }))
     },
     { key: 'sizeScale', type: 'range', label: 'Size', default: 1, min: 0.6, max: 1.8, step: 0.05 },
-    { key: 'uppercaseDate', type: 'boolean', label: 'Uppercase date', default: true }
+    { key: 'uppercaseDate', type: 'boolean', label: 'Uppercase date', default: true },
+    {
+      key: 'pulseSeconds',
+      type: 'boolean',
+      label: 'Pulse seconds',
+      description: 'The colon quietly pulses once a second, like a heartbeat.',
+      default: true
+    }
   ]
 };
