@@ -157,6 +157,104 @@ body {
   color: var(--ws-color-text-tertiary);
 }
 
+/* ------------------------------------------------------------------ */
+/* Slider primitive — shared by settings fields (.ws-range) and the       */
+/* music widget's volume control. The native browser slider is the        */
+/* single biggest "this looks like a website" tell, so every range input  */
+/* in the app renders through this one custom track+thumb instead. The    */
+/* filled portion reads the --ws-range-fill custom property, set by each  */
+/* call site's oninput handler rather than drawn as separate markup.      */
+/* ------------------------------------------------------------------ */
+.ws-range,
+.ws-music__volume {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ws-range::-webkit-slider-runnable-track,
+.ws-music__volume::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--ws-radius-pill);
+  background: linear-gradient(
+    to right,
+    var(--ws-color-accent) var(--ws-range-fill, 0%),
+    color-mix(in srgb, var(--ws-color-text-primary) 14%, transparent) var(--ws-range-fill, 0%)
+  );
+}
+
+.ws-range::-moz-range-track,
+.ws-music__volume::-moz-range-track {
+  height: 4px;
+  border-radius: var(--ws-radius-pill);
+  background: color-mix(in srgb, var(--ws-color-text-primary) 14%, transparent);
+}
+
+.ws-range::-moz-range-progress,
+.ws-music__volume::-moz-range-progress {
+  height: 4px;
+  border-radius: var(--ws-radius-pill);
+  background: var(--ws-color-accent);
+}
+
+.ws-range::-webkit-slider-thumb,
+.ws-music__volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  margin-top: -5.5px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: var(--ws-elevation-1);
+  transition: box-shadow var(--ws-duration-fast) var(--ws-ease-standard), transform var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-range::-moz-range-thumb,
+.ws-music__volume::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  box-shadow: var(--ws-elevation-1);
+  transition: box-shadow var(--ws-duration-fast) var(--ws-ease-standard), transform var(--ws-duration-fast) var(--ws-ease-standard);
+}
+
+.ws-range:hover::-webkit-slider-thumb,
+.ws-range:focus-visible::-webkit-slider-thumb,
+.ws-music__volume:hover::-webkit-slider-thumb,
+.ws-music__volume:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--ws-glow-accent);
+  transform: scale(1.08);
+}
+
+.ws-range:hover::-moz-range-thumb,
+.ws-range:focus-visible::-moz-range-thumb,
+.ws-music__volume:hover::-moz-range-thumb,
+.ws-music__volume:focus-visible::-moz-range-thumb {
+  box-shadow: var(--ws-glow-accent);
+  transform: scale(1.08);
+}
+
+.ws-range:active::-webkit-slider-thumb,
+.ws-music__volume:active::-webkit-slider-thumb {
+  transform: scale(0.96);
+}
+
+.ws-range:active::-moz-range-thumb,
+.ws-music__volume:active::-moz-range-thumb {
+  transform: scale(0.96);
+}
+
+.ws-range:focus-visible,
+.ws-music__volume:focus-visible {
+  outline: none;
+}
+
 .ws-skeleton {
   position: relative;
   overflow: hidden;

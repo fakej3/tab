@@ -81,8 +81,19 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
     max: '1',
     step: '0.01',
     'aria-label': 'Volume',
-    oninput: (event: Event) => callbacks.onVolumeChange(Number((event.target as HTMLInputElement).value))
+    oninput: (event: Event) => {
+      const el = event.target as HTMLInputElement;
+      updateVolumeFill(el);
+      callbacks.onVolumeChange(Number(el.value));
+    }
   }) as HTMLInputElement;
+
+  function updateVolumeFill(el: HTMLInputElement): void {
+    const min = Number(el.min) || 0;
+    const max = Number(el.max) || 1;
+    const pct = max > min ? ((Number(el.value) - min) / (max - min)) * 100 : 0;
+    el.style.setProperty('--ws-range-fill', `${pct}%`);
+  }
 
   const transport = h('div', { class: 'ws-music__transport' }, [prevBtn, playPauseBtn, nextBtn, volumeSlider]);
   const meta = h('div', { class: 'ws-music__meta' }, [title, artist]);
@@ -135,6 +146,7 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
 
   function setVolumeSlider(volume: number): void {
     volumeSlider.value = String(volume);
+    updateVolumeFill(volumeSlider);
   }
 
   return { root, canvas, showEmpty, showPlayer, setPlaying, setProgress, setVolumeSlider };

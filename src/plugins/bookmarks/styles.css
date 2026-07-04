@@ -7,7 +7,7 @@
 .ws-bookmarks__list {
   display: flex;
   flex-direction: column;
-  gap: var(--ws-space-hairline);
+  gap: var(--ws-space-1);
 }
 
 .ws-bookmarks__item {
@@ -27,9 +27,9 @@
 }
 
 .ws-bookmarks__favicon {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
+  width: var(--ws-icon-md);
+  height: var(--ws-icon-md);
+  border-radius: var(--ws-radius-xs);
   flex-shrink: 0;
 }
 
