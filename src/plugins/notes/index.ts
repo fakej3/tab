@@ -15,7 +15,11 @@ export function createNotesPlugin(): Plugin {
     widget: {
       defaultSize: { w: 4, h: 4 },
       minSize: { w: 2, h: 2 },
-      maxSize: { w: 8, h: 10 }
+      maxSize: { w: 8, h: 10 },
+      // The home screen defaults to just clock/search/quote so it reads as
+      // calm and intentional rather than a wall of widgets — every other
+      // widget is a click away in edit mode, never removed.
+      defaultHidden: true
     },
 
     init(context: PluginContext) {

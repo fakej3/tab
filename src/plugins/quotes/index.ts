@@ -13,9 +13,12 @@ export function createQuotesPlugin(): Plugin {
     version: '1.0.0',
     description: 'Local, favorite, and custom quotes.',
     widget: {
-      defaultSize: { w: 5, h: 3 },
+      defaultSize: { w: 4, h: 2 },
       minSize: { w: 3, h: 2 },
-      maxSize: { w: 10, h: 6 }
+      maxSize: { w: 10, h: 6 },
+      // A tiny, quiet line beneath search — never a competing block.
+      defaultPosition: { x: 4, y: 9 },
+      surface: 'none'
     },
 
     init(context: PluginContext) {

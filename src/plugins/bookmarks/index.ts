@@ -15,7 +15,8 @@ export function createBookmarksPlugin(): Plugin {
     widget: {
       defaultSize: { w: 3, h: 5 },
       minSize: { w: 2, h: 3 },
-      maxSize: { w: 5, h: 10 }
+      maxSize: { w: 5, h: 10 },
+      defaultHidden: true
     },
 
     init(context: PluginContext) {

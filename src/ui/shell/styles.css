@@ -210,6 +210,21 @@
   overflow: visible;
 }
 
+/* Opt-out surface for widgets that are pure typography on the wallpaper
+   (clock, quote) — none of .ws-glass's background/border/blur, and no
+   elevation shadow either (a shadow with nothing casting it just looks
+   like a smudge). Edit mode still gets its drag/resize affordances since
+   those live on .ws-widget, not this element. */
+.ws-widget__content--bare {
+  box-shadow: none;
+  background: transparent;
+}
+
+.ws-widget__content--bare:hover,
+.ws-widget.is-dragging .ws-widget__content--bare {
+  box-shadow: none;
+}
+
 .ws-widget__overlay {
   position: absolute;
   inset: -6px;

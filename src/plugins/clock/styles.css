@@ -4,27 +4,30 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: var(--ws-space-1);
-  padding: var(--ws-space-4);
+  gap: var(--ws-space-2);
   user-select: none;
 }
 
 .ws-clock__time {
   font-family: var(--ws-font-family-display);
-  font-size: calc(var(--ws-text-5xl) * var(--ws-clock-scale, 1));
+  /* A hero, not a widget — sized to be the first thing the eye lands on
+     now that it sits directly on the wallpaper with room to breathe. */
+  font-size: calc(var(--ws-text-5xl) * 1.5 * var(--ws-clock-scale, 1));
   font-weight: var(--ws-font-weight-display);
   line-height: 1;
   letter-spacing: var(--ws-letter-spacing-display);
-  color: var(--ws-color-text-primary);
+  color: var(--ws-color-text-on-wallpaper);
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.25);
   transition: font-size var(--ws-duration-slow) var(--ws-ease-standard);
 }
 
 .ws-clock__date {
-  font-size: calc(var(--ws-text-md) * var(--ws-clock-scale, 1));
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  color: var(--ws-color-text-secondary);
+  font-size: calc(var(--ws-text-sm) * var(--ws-clock-scale, 1));
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--ws-color-text-on-wallpaper-secondary);
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.2);
 }
 
 /* The clock's signature detail: the colon quietly pulses once a second,

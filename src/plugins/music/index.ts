@@ -15,7 +15,8 @@ export function createMusicPlugin(): Plugin {
     widget: {
       defaultSize: { w: 5, h: 4 },
       minSize: { w: 3, h: 3 },
-      maxSize: { w: 10, h: 8 }
+      maxSize: { w: 10, h: 8 },
+      defaultHidden: true
     },
 
     init(context: PluginContext) {

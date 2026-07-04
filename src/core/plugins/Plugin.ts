@@ -38,6 +38,14 @@ export interface WidgetDescriptor {
   allowOverflow?: boolean;
   /** Widget starts hidden the first time it's auto-placed (still reachable via the layout editor's show/hide toggle) — for plugins with nothing to show until configured. */
   defaultHidden?: boolean;
+  /** Preferred grid cell for a widget's very first placement (e.g. so the home composition reads as intentional rather than whatever the free-slot packer finds first). Falls back to auto-placement if the cell is already taken or omitted; has no effect after the widget's first registration. */
+  defaultPosition?: { x: number; y: number };
+  /** The shared glass card is the default so every widget looks consistent
+   *  out of the box, but it isn't the only valid surface — a widget that's
+   *  pure typography sitting directly on the wallpaper (the clock, a quiet
+   *  quote line) should opt out with 'none' rather than be forced into a
+   *  rectangle it doesn't need. */
+  surface?: 'glass' | 'none';
 }
 
 export interface Plugin {

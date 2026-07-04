@@ -15,7 +15,8 @@ export function createCalendarPlugin(): Plugin {
     widget: {
       defaultSize: { w: 4, h: 4 },
       minSize: { w: 3, h: 3 },
-      maxSize: { w: 6, h: 6 }
+      maxSize: { w: 6, h: 6 },
+      defaultHidden: true
     },
 
     init(context: PluginContext) {

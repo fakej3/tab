@@ -13,6 +13,15 @@ export interface ThemeTokens {
   textPrimary: string;
   textSecondary: string;
   textTertiary: string;
+  /** Text color for content that sits directly on the wallpaper (the hero
+   *  clock, the quiet quote line) rather than on a glass/solid surface.
+   *  Deliberately NOT the same dial as textPrimary: the wallpaper is set
+   *  completely independently of the theme, so a theme that flips
+   *  textPrimary to a dark color for light glass surfaces must not also
+   *  flip this — that would put dark text on the (still dark by default)
+   *  wallpaper with no surface behind it to justify the flip. */
+  onWallpaper: string;
+  onWallpaperSecondary: string;
   success: string;
   warning: string;
   danger: string;
@@ -37,6 +46,8 @@ export const TOKEN_CSS_VARS: Record<keyof ThemeTokens, string> = {
   textPrimary: '--ws-color-text-primary',
   textSecondary: '--ws-color-text-secondary',
   textTertiary: '--ws-color-text-tertiary',
+  onWallpaper: '--ws-color-text-on-wallpaper',
+  onWallpaperSecondary: '--ws-color-text-on-wallpaper-secondary',
   success: '--ws-color-success',
   warning: '--ws-color-warning',
   danger: '--ws-color-danger',
@@ -56,6 +67,8 @@ export const DEFAULT_TOKENS: ThemeTokens = {
   textPrimary: '#f5f5f7',
   textSecondary: 'rgba(245, 245, 247, 0.72)',
   textTertiary: 'rgba(245, 245, 247, 0.48)',
+  onWallpaper: '#f5f5f7',
+  onWallpaperSecondary: 'rgba(245, 245, 247, 0.78)',
   success: '#4ade80',
   warning: '#fbbf24',
   danger: '#f87171',

@@ -92,8 +92,17 @@ export class LayoutCanvas {
   }
 
   private createHandle(widget: WidgetLayout): WidgetHandle {
-    const allowOverflow = this.app.plugins.get(widget.pluginId)?.widget?.allowOverflow;
-    const mountPoint = h('div', { class: `ws-widget__content ws-glass${allowOverflow ? ' ws-widget__content--overflow-visible' : ''}` });
+    const descriptor = this.app.plugins.get(widget.pluginId)?.widget;
+    const allowOverflow = descriptor?.allowOverflow;
+    const bare = descriptor?.surface === 'none';
+    const contentClass = [
+      'ws-widget__content',
+      bare ? 'ws-widget__content--bare' : 'ws-glass',
+      allowOverflow ? 'ws-widget__content--overflow-visible' : ''
+    ]
+      .filter(Boolean)
+      .join(' ');
+    const mountPoint = h('div', { class: contentClass });
     const overlay = h('div', { class: 'ws-widget__overlay' });
     const wrapper = h('div', { class: 'ws-widget', 'data-plugin-id': widget.pluginId }, [mountPoint, overlay]);
 

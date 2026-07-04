@@ -3,40 +3,30 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: var(--ws-space-2);
-  padding: var(--ws-space-5);
+  gap: var(--ws-space-1);
   position: relative;
 }
 
-/* A quiet oversized quotation mark sitting behind the text — the one
-   ornamental flourish this widget gets, and it costs nothing in clutter
-   since it lives behind the content at low opacity. */
-.ws-quotes::before {
-  content: '“';
-  position: absolute;
-  top: -0.35em;
-  left: var(--ws-space-4);
-  font-family: var(--ws-font-family-display);
-  font-size: 4.5rem;
-  line-height: 1;
-  color: var(--ws-color-text-primary);
-  opacity: 0.06;
-  pointer-events: none;
-}
-
+/* Deliberately quiet — a small aside beneath the search bar, not a card
+   competing with the clock for attention. No decorative quotation mark,
+   no card background; just dim, italic text sitting on the wallpaper. */
 .ws-quotes__text {
   font-family: var(--ws-font-family-display);
-  font-size: var(--ws-text-lg);
+  font-size: var(--ws-text-sm);
+  font-style: italic;
   font-weight: 400;
-  line-height: 1.45;
-  color: var(--ws-color-text-primary);
+  line-height: 1.5;
+  color: var(--ws-color-text-on-wallpaper-secondary);
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.2);
   position: relative;
 }
 
 .ws-quotes__author {
   font-style: normal;
-  font-size: var(--ws-text-sm);
-  color: var(--ws-color-text-secondary);
+  font-size: var(--ws-text-2xs);
+  color: var(--ws-color-text-on-wallpaper-secondary);
+  opacity: 0.7;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.2);
   position: relative;
 }
 
@@ -73,12 +63,12 @@
   width: var(--ws-control-height-sm);
   height: var(--ws-control-height-sm);
   border-radius: var(--ws-radius-pill);
-  color: var(--ws-color-text-tertiary);
+  color: var(--ws-color-text-on-wallpaper-secondary);
 }
 
 .ws-quotes__action:hover {
-  background: color-mix(in srgb, var(--ws-color-text-primary) 10%, transparent);
-  color: var(--ws-color-text-primary);
+  background: color-mix(in srgb, var(--ws-color-text-on-wallpaper) 10%, transparent);
+  color: var(--ws-color-text-on-wallpaper);
 }
 
 .ws-quotes__action.is-active {
@@ -107,7 +97,7 @@
   border-radius: var(--ws-radius-sm);
   padding: var(--ws-space-2);
   font-size: var(--ws-text-sm);
-  color: var(--ws-color-text-primary);
+  color: var(--ws-color-text-on-wallpaper);
   outline: none;
   transition: border-color var(--ws-duration-base) var(--ws-ease-standard);
 }

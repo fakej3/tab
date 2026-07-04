@@ -13,9 +13,15 @@ export function createClockPlugin(): Plugin {
     version: '1.0.0',
     description: 'An elegant, highly customizable clock.',
     widget: {
-      defaultSize: { w: 4, h: 4 },
+      defaultSize: { w: 6, h: 4 },
       minSize: { w: 2, h: 2 },
-      maxSize: { w: 8, h: 8 }
+      maxSize: { w: 8, h: 8 },
+      // Centered, upper-third hero position — the clock is the first thing
+      // a new tab should read as, not one tile among several.
+      defaultPosition: { x: 3, y: 1 },
+      // Pure typography sitting on the wallpaper, not a glass card — the
+      // clock is artwork, not a widget.
+      surface: 'none'
     },
 
     init(context: PluginContext) {

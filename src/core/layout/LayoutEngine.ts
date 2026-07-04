@@ -60,7 +60,13 @@ export class LayoutEngine {
     this.workspaces.set((prev) =>
       prev.map((workspace) => {
         if (workspace.widgets.some((widget) => widget.pluginId === pluginId)) return workspace;
-        const slot = findFreeSlot(workspace.widgets, descriptor.defaultSize, this.gridConfig.columns);
+        const preferred = descriptor.defaultPosition
+          ? { ...descriptor.defaultSize, x: descriptor.defaultPosition.x, y: descriptor.defaultPosition.y }
+          : null;
+        const slot =
+          preferred && !hasCollision(preferred, workspace.widgets)
+            ? preferred
+            : findFreeSlot(workspace.widgets, descriptor.defaultSize, this.gridConfig.columns);
         const widget: WidgetLayout = {
           instanceId: createId('widget'),
           pluginId,

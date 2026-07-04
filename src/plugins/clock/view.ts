@@ -19,7 +19,10 @@ export interface ClockView {
 export function createClockView(): ClockView {
   const timeEl = h('div', { class: 'ws-clock__time' });
   const dateEl = h('div', { class: 'ws-clock__date' });
-  const root = h('div', { class: 'ws-clock', role: 'group', 'aria-label': 'Clock' }, [timeEl, dateEl]);
+  // Date leads, time is the headline beneath it — a masthead, not a
+  // digital-clock readout. DOM order matches the visual order so it also
+  // reads correctly to a screen reader.
+  const root = h('div', { class: 'ws-clock', role: 'group', 'aria-label': 'Clock' }, [dateEl, timeEl]);
 
   function update(now: Date, state: ClockState): void {
     root.dataset.style = state.style;

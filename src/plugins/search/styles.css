@@ -1,18 +1,32 @@
+/* Overrides the shared .ws-glass token for something much softer — a
+   floating pill (Spotlight/Raycast), not a rectangle with a visible edge.
+   Combined selector for specificity, not source order, so this reliably
+   wins over .ws-glass regardless of import order. */
+.ws-search.ws-glass {
+  background: color-mix(in srgb, var(--ws-color-surface) 10%, transparent);
+  border-color: transparent;
+  border-radius: var(--ws-radius-pill);
+  box-shadow: var(--ws-elevation-1);
+}
+
 .ws-search {
   height: 100%;
   position: relative;
   display: flex;
   flex-direction: column;
   transform: scale(1);
-  transition: transform var(--ws-duration-slow) var(--ws-ease-standard);
+  transition: transform var(--ws-duration-slow) var(--ws-ease-standard), box-shadow var(--ws-duration-slow) var(--ws-ease-standard),
+    background-color var(--ws-duration-slow) var(--ws-ease-standard);
 }
 
 /* The emotional center of the interface gets the one deliberately
-   noticeable focus treatment in the whole app: a faint grow, on top of
-   the shared .ws-motion-focus-glow ring every focusable glass surface
-   already gets. */
+   noticeable focus treatment in the whole app: a faint grow and a slightly
+   more present surface, on top of the shared .ws-motion-focus-glow ring
+   every focusable glass surface already gets. */
 .ws-search:focus-within {
-  transform: scale(1.006);
+  transform: scale(1.008);
+  background: color-mix(in srgb, var(--ws-color-surface) 14%, transparent);
+  box-shadow: var(--ws-elevation-2);
 }
 
 .ws-search__row {
@@ -20,7 +34,7 @@
   display: flex;
   align-items: center;
   gap: var(--ws-space-3);
-  padding: 0 var(--ws-space-5);
+  padding: 0 var(--ws-space-6);
 }
 
 .ws-search__icon {

@@ -20,6 +20,10 @@
   --ws-color-text-primary: #f5f5f7;
   --ws-color-text-secondary: rgba(245, 245, 247, 0.72);
   --ws-color-text-tertiary: rgba(245, 245, 247, 0.48);
+  /* For content directly on the wallpaper (hero clock, quote) — kept
+     independent of text-primary/secondary above, see tokens.ts for why. */
+  --ws-color-text-on-wallpaper: #f5f5f7;
+  --ws-color-text-on-wallpaper-secondary: rgba(245, 245, 247, 0.78);
   --ws-color-success: #4ade80;
   --ws-color-warning: #fbbf24;
   --ws-color-danger: #f87171;
