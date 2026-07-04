@@ -33,7 +33,14 @@ export const THEME_PRESETS: ThemePreset[] = [
       textSecondary: 'rgba(21, 21, 31, 0.7)',
       textTertiary: 'rgba(21, 21, 31, 0.46)',
       glassOpacity: 0.82,
-      shadowIntensity: 0.14
+      shadowIntensity: 0.14,
+      // Airy and soft-focus rather than sharply frosted — daylight doesn't
+      // need the deep blur a dark theme leans on to feel premium — and the
+      // signature rim light is dialed back so it doesn't read as a stray
+      // glow against a bright surface.
+      radius: 22,
+      glassBlur: 20,
+      edgeLight: 0.18
     }
   },
   {
@@ -46,7 +53,12 @@ export const THEME_PRESETS: ThemePreset[] = [
       background: '#0e141b',
       textPrimary: '#eceff4',
       glassOpacity: 0.08,
-      radius: 14
+      radius: 14,
+      // Cold and restrained: deeper frost, flatter shadows, a quieter rim
+      // light than the default — the opposite mood from Ember's warmth.
+      glassBlur: 34,
+      shadowIntensity: 0.24,
+      edgeLight: 0.2
     }
   },
   {
@@ -58,7 +70,11 @@ export const THEME_PRESETS: ThemePreset[] = [
       accentContrast: '#1a0f0a',
       background: '#120b09',
       glassOpacity: 0.12,
-      shadowIntensity: 0.45
+      shadowIntensity: 0.45,
+      // Warm and enveloping: rounder surfaces, a stronger accent-lit rim —
+      // the one theme that leans into glow rather than restraint.
+      radius: 24,
+      edgeLight: 0.5
     }
   },
   {
@@ -71,7 +87,11 @@ export const THEME_PRESETS: ThemePreset[] = [
       background: '#0a0a0a',
       glassOpacity: 0.06,
       radius: 10,
-      shadowIntensity: 0.2
+      shadowIntensity: 0.2,
+      // Graphic and austere: barely any blur (flat, print-like surfaces)
+      // and almost no rim light — an achromatic theme shouldn't glow.
+      glassBlur: 16,
+      edgeLight: 0.05
     }
   }
 ];
