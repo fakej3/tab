@@ -14,7 +14,6 @@
   background: transparent;
   border: none;
   outline: none;
-  caret-color: var(--ws-color-accent);
   color: var(--ws-color-text-primary);
   font-family: var(--ws-font-family-display);
   font-size: var(--ws-text-md);

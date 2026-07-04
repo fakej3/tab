@@ -73,9 +73,27 @@
   transition: background var(--ws-duration-fast) var(--ws-ease-standard), color var(--ws-duration-fast) var(--ws-ease-standard);
 }
 
+.ws-palette__item {
+  position: relative;
+}
+
 .ws-palette__item.is-active {
-  background: color-mix(in srgb, var(--ws-color-accent) 16%, transparent);
+  background: color-mix(in srgb, var(--ws-color-accent) 12%, transparent);
   color: var(--ws-color-text-primary);
+}
+
+/* Same slim accent rail used for the active settings-nav item — the two
+   are both "you are here" markers in a list, so they share one visual
+   language instead of inventing a second way to say the same thing. */
+.ws-palette__item.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 2px;
+  border-radius: var(--ws-radius-pill);
+  background: var(--ws-color-accent);
 }
 
 .ws-palette__item-group {
@@ -88,6 +106,37 @@
   text-align: center;
   font-size: var(--ws-text-sm);
   color: var(--ws-color-text-tertiary);
+}
+
+.ws-palette__footer {
+  display: flex;
+  align-items: center;
+  gap: var(--ws-space-4);
+  padding: var(--ws-space-2) var(--ws-space-4);
+  border-top: 1px solid var(--ws-surface-border-color);
+}
+
+.ws-palette__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ws-space-1);
+  font-size: var(--ws-text-2xs);
+  color: var(--ws-color-text-tertiary);
+}
+
+.ws-palette__hint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--ws-radius-xs);
+  background: color-mix(in srgb, var(--ws-color-text-primary) 8%, transparent);
+  border: 1px solid var(--ws-surface-border-color);
+  font-family: inherit;
+  font-size: var(--ws-text-2xs);
+  color: var(--ws-color-text-secondary);
 }
 
 @media (prefers-reduced-motion: reduce) {

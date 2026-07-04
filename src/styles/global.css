@@ -64,6 +64,17 @@ body {
   color: var(--ws-color-accent-contrast);
 }
 
+/* The text cursor is one of the smallest, most constant details on screen
+   whenever any field is focused — a plain black/grey system caret is a
+   quiet but persistent "this is an HTML input" tell. Every text field in
+   the app blinks in the accent color instead, with no per-component
+   opt-in needed. */
+input,
+textarea,
+[contenteditable] {
+  caret-color: var(--ws-color-accent);
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

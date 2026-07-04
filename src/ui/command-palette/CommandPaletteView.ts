@@ -33,7 +33,17 @@ export class CommandPaletteView {
 
     this.list = h('div', { class: 'ws-palette__list', role: 'listbox', id: LIST_ID, 'aria-label': 'Commands' });
 
-    const panel = h('div', { class: 'ws-palette ws-glass' }, [h('div', { class: 'ws-palette__input-row' }, [icons.search(), this.input]), this.list]);
+    const footer = h('div', { class: 'ws-palette__footer' }, [
+      h('span', { class: 'ws-palette__hint' }, [h('kbd', {}, ['↑↓']), ' navigate']),
+      h('span', { class: 'ws-palette__hint' }, [h('kbd', {}, ['↵']), ' select']),
+      h('span', { class: 'ws-palette__hint' }, [h('kbd', {}, ['esc']), ' close'])
+    ]);
+
+    const panel = h('div', { class: 'ws-palette ws-glass' }, [
+      h('div', { class: 'ws-palette__input-row' }, [icons.search(), this.input]),
+      this.list,
+      footer
+    ]);
     panel.addEventListener('click', (event) => event.stopPropagation());
 
     this.root = h('div', { class: 'ws-palette-backdrop', onclick: () => this.app.commandPalette.close() }, [panel]);
