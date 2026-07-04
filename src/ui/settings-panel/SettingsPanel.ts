@@ -174,6 +174,14 @@ export class SettingsPanel {
       return;
     }
 
+    // Search can filter the currently active section right out of the
+    // list — jump to the first match so the content pane never shows a
+    // section that isn't even visible in the nav beside it.
+    if (!matches.some((section) => section.id === this.activeSectionId)) {
+      this.activeSectionId = matches[0]!.id;
+      this.renderContent();
+    }
+
     for (const section of matches) {
       const btn = h(
         'button',
