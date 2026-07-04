@@ -84,7 +84,8 @@
 
 .ws-settings-panel__search-input {
   width: 100%;
-  padding: var(--ws-space-2) var(--ws-space-3);
+  height: var(--ws-control-height-md);
+  padding: 0 var(--ws-space-3);
   border-radius: var(--ws-radius-sm);
   border: 1px solid var(--ws-surface-border-color);
   background: color-mix(in srgb, var(--ws-color-text-primary) 4%, transparent);
@@ -251,7 +252,8 @@
 .ws-select,
 .ws-text-input {
   width: 100%;
-  padding: var(--ws-space-2) var(--ws-space-3);
+  height: var(--ws-control-height-md);
+  padding: 0 var(--ws-space-3);
   border-radius: var(--ws-radius-sm);
   border: 1px solid var(--ws-surface-border-color);
   background: color-mix(in srgb, var(--ws-color-text-primary) 4%, transparent);
@@ -282,7 +284,10 @@
 }
 
 .ws-chip {
-  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  height: var(--ws-control-height-sm);
+  padding: 0 var(--ws-space-3);
   border-radius: var(--ws-radius-pill);
   font-size: var(--ws-text-xs);
   border: 1px solid var(--ws-surface-border-color);
@@ -307,7 +312,10 @@
 }
 
 .ws-btn {
-  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  height: var(--ws-control-height-md);
+  padding: 0 var(--ws-space-4);
   border-radius: var(--ws-radius-sm);
   font-size: var(--ws-text-xs);
   border: 1px solid var(--ws-surface-border-color);
