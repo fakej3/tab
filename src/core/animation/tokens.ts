@@ -8,6 +8,7 @@ export interface AnimationTokens {
   easingEmphasized: string;
   easingSpring: string;
   reduceMotion: boolean;
+  entranceAnimation: boolean;
 }
 
 export const DEFAULT_ANIMATION_TOKENS: AnimationTokens = {
@@ -18,7 +19,8 @@ export const DEFAULT_ANIMATION_TOKENS: AnimationTokens = {
   easingStandard: 'cubic-bezier(0.22, 1, 0.36, 1)',
   easingEmphasized: 'cubic-bezier(0.16, 1, 0.3, 1)',
   easingSpring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-  reduceMotion: false
+  reduceMotion: false,
+  entranceAnimation: true
 };
 
 export const ANIMATION_CSS_VARS = {

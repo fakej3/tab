@@ -14,6 +14,7 @@ export function renderWallpaperExtras(app: Application): HTMLElement {
     type: 'file',
     accept: 'image/*',
     class: 'ws-visually-hidden',
+    tabindex: -1,
     onchange: async (event: Event) => {
       const files = (event.target as HTMLInputElement).files;
       if (files?.[0]) {

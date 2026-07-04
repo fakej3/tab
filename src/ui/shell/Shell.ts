@@ -30,12 +30,38 @@ export function mountShell(root: HTMLElement, app: Application): void {
   ]);
   const chrome = h('div', { class: 'ws-chrome ws-glass' }, [editModeBtn, settingsBtn]);
 
-  const shell = h('div', { class: 'ws-shell' }, [wallpaperContainer, ambienceContainer, layoutContainer, chrome, workspaceSwitcher]);
+  // First-load entrance: widgets and ambience settle in over well under a
+  // second instead of popping in with the rest of the HTML. Wallpaper and
+  // the hover-revealed chrome/workspace-switcher already have their own
+  // reveal behavior, so they're deliberately left alone here. Skipped
+  // entirely (no class added, nothing ever hidden) when the user has
+  // reduced motion on or has turned the setting off — this is pure
+  // first-impression polish, never something a returning user has to wait
+  // through or that fights the reduced-motion contract.
+  const { entranceAnimation, reduceMotion } = app.animation.getTokens();
+  const playEntrance = entranceAnimation && !reduceMotion;
+
+  const shell = h('div', { class: `ws-shell${playEntrance ? ' is-pre-entrance' : ''}` }, [
+    wallpaperContainer,
+    ambienceContainer,
+    layoutContainer,
+    chrome,
+    workspaceSwitcher
+  ]);
   root.append(shell);
 
   app.wallpaper.mount(wallpaperContainer);
   app.ambience.mount(ambienceContainer);
-  new LayoutCanvas(layoutContainer, app);
+  new LayoutCanvas(layoutContainer, app, playEntrance);
+
+  if (playEntrance) {
+    // Two frames: the first commits the pre-entrance (hidden) styles so the
+    // browser has actually painted them; only then does removing the class
+    // register as a change the transition can animate from.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => shell.classList.remove('is-pre-entrance'));
+    });
+  }
 
   const settingsPanel = new SettingsPanel(app);
   settingsPanel.mount(root);

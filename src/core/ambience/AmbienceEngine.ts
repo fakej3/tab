@@ -63,7 +63,6 @@ const AMBIENCE_SECTION: SettingsSection = {
 export class AmbienceEngine {
   private glowLayer: HTMLElement | null = null;
   private grainLayer: HTMLElement | null = null;
-  private prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   private pointerAttached = false;
   private rafHandle = 0;
 
@@ -75,6 +74,15 @@ export class AmbienceEngine {
   init(): void {
     this.settings.registerSection(AMBIENCE_SECTION);
     this.settings.subscribeNamespace(NAMESPACE, () => this.applyFromSettings());
+    // Reduce-motion can also come from the app's own "Reduce motion" toggle
+    // (Motion settings), not just the OS preference — re-evaluate whenever
+    // that changes too, since AnimationEngine is what keeps the shared
+    // `is-reduced-motion` class (checked below) in sync with both sources.
+    this.settings.subscribeNamespace('animation', () => this.applyFromSettings());
+  }
+
+  private prefersReducedMotion(): boolean {
+    return document.documentElement.classList.contains('is-reduced-motion');
   }
 
   mount(container: HTMLElement): void {
@@ -97,13 +105,13 @@ export class AmbienceEngine {
       grainIntensity: number;
     };
 
-    const glowEnabled = values.cursorGlow && !this.prefersReducedMotion.matches;
+    const glowEnabled = values.cursorGlow && !this.prefersReducedMotion();
     this.glowLayer.classList.toggle('is-active', glowEnabled);
     this.glowLayer.style.setProperty('--ws-glow-opacity', String(values.cursorGlowIntensity * 0.6));
     if (glowEnabled) this.attachPointerTracking();
 
     this.grainLayer.classList.toggle('is-active', values.grain);
-    this.grainLayer.classList.toggle('is-animated', values.grain && !this.prefersReducedMotion.matches);
+    this.grainLayer.classList.toggle('is-animated', values.grain && !this.prefersReducedMotion());
     this.grainLayer.style.setProperty('--ws-grain-opacity', String(values.grainIntensity * 0.09));
   }
 

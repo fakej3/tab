@@ -29,6 +29,13 @@ const ANIMATION_SECTION: SettingsSection = {
       label: 'Reduce motion',
       description: 'Collapses transitions to instant, subtle fades.',
       default: DEFAULT_ANIMATION_TOKENS.reduceMotion
+    },
+    {
+      key: 'entranceAnimation',
+      type: 'boolean',
+      label: 'Entrance animation',
+      description: 'A brief, graceful reveal when the workspace first loads.',
+      default: DEFAULT_ANIMATION_TOKENS.entranceAnimation
     }
   ]
 };
@@ -61,8 +68,14 @@ export class AnimationEngine {
     this.tokens = {
       ...DEFAULT_ANIMATION_TOKENS,
       speedMultiplier: (values.speedMultiplier as number) ?? DEFAULT_ANIMATION_TOKENS.speedMultiplier,
-      reduceMotion: Boolean(values.reduceMotion) || this.systemPrefersReducedMotion.matches
+      reduceMotion: Boolean(values.reduceMotion) || this.systemPrefersReducedMotion.matches,
+      entranceAnimation: values.entranceAnimation !== false
     };
+
+    // Mirrors the OS-level `prefers-reduced-motion` media query in reset.css
+    // so the manual "Reduce motion" setting actually collapses CSS
+    // transitions/animations too, not just JS-driven ones via animate().
+    document.documentElement.classList.toggle('is-reduced-motion', this.tokens.reduceMotion);
 
     this.theme.applyVariables({
       [ANIMATION_CSS_VARS.durationFast]: `${this.tokens.durationFast * this.tokens.speedMultiplier}ms`,

@@ -18,6 +18,16 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  transition: opacity var(--ws-duration-slow) var(--ws-ease-standard);
+}
+
+/* First-load entrance — see mountShell()/LayoutCanvas for the class
+   lifecycle. Wallpaper crossfades in on its own (WallpaperEngine) and the
+   chrome/workspace-switcher are already hidden until hovered, so neither
+   needs anything here; this only covers ambience and the widgets
+   themselves settling into place. */
+.ws-shell.is-pre-entrance .ws-ambience {
+  opacity: 0;
 }
 
 .ws-wallpaper-layer {
@@ -90,7 +100,7 @@
   width: 112%;
   height: 112%;
   transform: translate3d(var(--ws-parallax-x, 0px), var(--ws-parallax-y, 0px), 0);
-  transition: transform 700ms var(--ws-ease-standard);
+  transition: transform var(--ws-duration-drift) var(--ws-ease-standard);
   will-change: transform;
   overflow: hidden;
 }
@@ -124,9 +134,15 @@
   will-change: transform, width, height;
   /* Idle moves (e.g. an import, or a rejected drag snapping back) animate
      smoothly; an active drag disables this so the widget tracks the
-     pointer 1:1 with zero lag. */
+     pointer 1:1 with zero lag. The opacity entry is entrance-only — see
+     --ws-entrance-delay in LayoutCanvas — and lives on its own so the
+     per-widget stagger never delays the position/size transitions above. */
   transition: transform var(--ws-duration-base) var(--ws-ease-standard), width var(--ws-duration-base) var(--ws-ease-standard),
-    height var(--ws-duration-base) var(--ws-ease-standard);
+    height var(--ws-duration-base) var(--ws-ease-standard), opacity var(--ws-duration-slow) var(--ws-ease-standard) var(--ws-entrance-delay, 0ms);
+}
+
+.ws-shell.is-pre-entrance .ws-widget {
+  opacity: 0;
 }
 
 .ws-widget.is-hidden {
@@ -136,6 +152,27 @@
 .ws-widget.is-dragging {
   z-index: 5;
   transition: none;
+}
+
+/* A rejected move/resize (colliding with another widget) otherwise looks
+   identical to the drag just not responding — this reads as "that spot's
+   taken" instead. Transform-only and brief, so it layers cleanly on top of
+   is-dragging's own (disabled) transition without fighting it. */
+.ws-widget.is-drag-blocked {
+  animation: ws-widget-blocked-shake 220ms var(--ws-ease-standard);
+}
+
+@keyframes ws-widget-blocked-shake {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  25% {
+    translate: -4px 0;
+  }
+  75% {
+    translate: 4px 0;
+  }
 }
 
 /* Any widget with focus (e.g. the search bar showing a suggestions
@@ -150,7 +187,15 @@
   height: 100%;
   overflow: hidden;
   box-shadow: var(--ws-elevation-1);
-  transition: box-shadow var(--ws-duration-slow) var(--ws-ease-standard), transform var(--ws-duration-slow) var(--ws-ease-standard);
+  /* The transform entry only ever fires during the entrance (below) — the
+     same --ws-entrance-delay stagger as the wrapper's opacity, so each
+     widget's fade and rise read as one movement. */
+  transition: box-shadow var(--ws-duration-slow) var(--ws-ease-standard),
+    transform var(--ws-duration-slow) var(--ws-ease-standard) var(--ws-entrance-delay, 0ms);
+}
+
+.ws-shell.is-pre-entrance .ws-widget__content {
+  transform: translateY(10px);
 }
 
 .ws-widget__content:hover {
@@ -289,8 +334,8 @@
   transform: translateX(-50%);
   z-index: var(--ws-z-chrome);
   display: flex;
-  gap: 2px;
-  padding: 4px;
+  gap: var(--ws-space-hairline);
+  padding: var(--ws-space-1);
   opacity: 0;
   transition: opacity var(--ws-duration-base) var(--ws-ease-standard);
 }

@@ -53,6 +53,7 @@ export function renderGeneralSection(app: Application): HTMLElement {
     type: 'file',
     accept: 'application/json',
     class: 'ws-visually-hidden',
+    tabindex: -1,
     onchange: async (event: Event) => {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (!file) return;

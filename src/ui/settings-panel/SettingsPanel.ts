@@ -64,6 +64,12 @@ export class SettingsPanel {
     this.backdrop = h('div', { class: 'ws-settings-backdrop', onclick: () => this.close() }, [panel]);
     panel.addEventListener('click', (event) => event.stopPropagation());
     this.root = this.backdrop;
+    // The backdrop only fades out visually (opacity/pointer-events) when
+    // closed — `inert` is what actually removes every control inside it
+    // (nav items, every setting field, the close button) from the Tab
+    // order and the accessibility tree, so a keyboard user tabbing past
+    // the panel doesn't land on invisible, unreachable-by-mouse controls.
+    this.root.inert = true;
   }
 
   mount(container: HTMLElement): void {
@@ -98,6 +104,7 @@ export class SettingsPanel {
     this.searchInput.value = '';
     this.renderSidebar();
     this.renderContent();
+    this.root.inert = false;
     // A pure CSS transition (see styles.css) rather than a one-shot WAAPI
     // call — keeps this overlay's entrance driven by the same `.is-open`
     // class pattern as the command palette instead of a second mechanism.
@@ -107,6 +114,7 @@ export class SettingsPanel {
   close(): void {
     this.isOpen = false;
     this.root.classList.remove('is-open');
+    this.root.inert = true;
     this.app.bus.emit('settings-panel:close', undefined);
   }
 

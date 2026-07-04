@@ -16,16 +16,24 @@ interface WidgetHandle {
  * calls. This is the only place in the app that touches pointer events for
  * layout — plugins never know they're draggable.
  */
+// Per-widget stagger step and cap for the first-load entrance below — kept
+// small enough that even a full grid of widgets finishes settling well
+// under a second alongside their own ~400ms reveal transition.
+const ENTRANCE_STAGGER_STEP_MS = 35;
+const ENTRANCE_STAGGER_MAX_MS = 280;
+
 export class LayoutCanvas {
   private container: HTMLElement;
   private handles = new Map<string, WidgetHandle>();
   private unsubscribeLayout: () => void;
   private unsubscribeEditMode: () => void;
   private resizeObserver: ResizeObserver;
+  private entranceWidgetCount = 0;
 
   constructor(
     container: HTMLElement,
-    private app: Application
+    private app: Application,
+    private playEntrance = false
   ) {
     this.container = container;
     this.container.classList.add('ws-layout-canvas');
@@ -37,6 +45,10 @@ export class LayoutCanvas {
     this.resizeObserver = new ResizeObserver(() => this.render());
     this.resizeObserver.observe(this.container);
     this.render();
+    // Only the widgets present at that very first render get staggered —
+    // anything added later (enabling a plugin, editing layout) should just
+    // appear normally, not replay a "grand entrance" for one new widget.
+    this.playEntrance = false;
   }
 
   destroy(): void {
@@ -84,6 +96,17 @@ export class LayoutCanvas {
     const mountPoint = h('div', { class: `ws-widget__content ws-glass${allowOverflow ? ' ws-widget__content--overflow-visible' : ''}` });
     const overlay = h('div', { class: 'ws-widget__overlay' });
     const wrapper = h('div', { class: 'ws-widget', 'data-plugin-id': widget.pluginId }, [mountPoint, overlay]);
+
+    if (this.playEntrance) {
+      const delay = Math.min(this.entranceWidgetCount * ENTRANCE_STAGGER_STEP_MS, ENTRANCE_STAGGER_MAX_MS);
+      wrapper.style.setProperty('--ws-entrance-delay', `${delay}ms`);
+      this.entranceWidgetCount += 1;
+      // The delay only matters for that first reveal — clearing it once the
+      // entrance transition has had time to finish means every later change
+      // (hide/show, drag, resize) transitions immediately like normal.
+      window.setTimeout(() => wrapper.style.removeProperty('--ws-entrance-delay'), delay + 500);
+    }
+
     this.container.append(wrapper);
     return { wrapper, mountPoint, overlay };
   }
@@ -141,6 +164,7 @@ export class LayoutCanvas {
     const columnWidth = this.columnWidthPx();
     const wrapper = this.handles.get(widget.instanceId)?.wrapper;
     wrapper?.classList.add('is-dragging');
+    let wasBlocked = false;
 
     const onMove = (moveEvent: PointerEvent) => {
       const delta = pixelsToGridDelta(
@@ -148,7 +172,13 @@ export class LayoutCanvas {
         this.app.layout.gridConfig,
         columnWidth
       );
-      this.app.layout.moveWidget(widget.instanceId, widget.x + delta.x, widget.y + delta.y);
+      const moved = this.app.layout.moveWidget(widget.instanceId, widget.x + delta.x, widget.y + delta.y);
+      // A rejected move (colliding with another widget) otherwise looks
+      // exactly like the widget just not following the cursor, with no
+      // explanation — flash it on the transition into "blocked" so it
+      // reads as "that spot's taken," not as the drag being broken.
+      if (!moved && !wasBlocked) flashBlocked(wrapper);
+      wasBlocked = !moved;
     };
     const onUp = () => {
       wrapper?.classList.remove('is-dragging');
@@ -167,6 +197,7 @@ export class LayoutCanvas {
     const columnWidth = this.columnWidthPx();
     const wrapper = this.handles.get(widget.instanceId)?.wrapper;
     wrapper?.classList.add('is-dragging');
+    let wasBlocked = false;
 
     const onMove = (moveEvent: PointerEvent) => {
       const delta = pixelsToGridDelta(
@@ -174,7 +205,9 @@ export class LayoutCanvas {
         this.app.layout.gridConfig,
         columnWidth
       );
-      this.app.layout.resizeWidget(widget.instanceId, widget.w + delta.x, widget.h + delta.y);
+      const resized = this.app.layout.resizeWidget(widget.instanceId, widget.w + delta.x, widget.h + delta.y);
+      if (!resized && !wasBlocked) flashBlocked(wrapper);
+      wasBlocked = !resized;
     };
     const onUp = () => {
       wrapper?.classList.remove('is-dragging');
@@ -184,4 +217,17 @@ export class LayoutCanvas {
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
   }
+}
+
+const BLOCKED_FLASH_MS = 220;
+
+/** Brief shake so a rejected move/resize reads as "that spot's taken" rather than the drag silently doing nothing. */
+function flashBlocked(wrapper: HTMLElement | undefined): void {
+  if (!wrapper) return;
+  wrapper.classList.remove('is-drag-blocked');
+  // Force a reflow so re-adding the class restarts the animation even if
+  // it's still mid-flash from the previous blocked frame.
+  void wrapper.offsetWidth;
+  wrapper.classList.add('is-drag-blocked');
+  window.setTimeout(() => wrapper.classList.remove('is-drag-blocked'), BLOCKED_FLASH_MS);
 }

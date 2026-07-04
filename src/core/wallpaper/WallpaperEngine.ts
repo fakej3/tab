@@ -164,7 +164,6 @@ export class WallpaperEngine {
   private currentLayer: HTMLElement | null = null;
   private library: WallpaperImage[] = [];
   private renderToken = 0;
-  private prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   constructor(
     private settings: SettingsManager,
@@ -301,7 +300,7 @@ export class WallpaperEngine {
   private attachParallax(container: HTMLElement): void {
     let raf = 0;
     window.addEventListener('pointermove', (event) => {
-      if (this.prefersReducedMotion.matches) return;
+      if (document.documentElement.classList.contains('is-reduced-motion')) return;
       if (!this.settings.get<boolean>(NAMESPACE, 'parallax')) return;
       if (raf) return;
       raf = requestAnimationFrame(() => {

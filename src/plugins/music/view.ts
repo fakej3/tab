@@ -25,6 +25,7 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
     accept: 'audio/*',
     multiple: true,
     class: 'ws-visually-hidden',
+    tabindex: -1,
     onchange: (event: Event) => {
       const files = (event.target as HTMLInputElement).files;
       if (files && files.length > 0) callbacks.onPickFiles(files);
@@ -114,7 +115,7 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
         paint();
         title.classList.remove('is-fading');
         artist.classList.remove('is-fading');
-      }, 160);
+      }, 220); // must match --ws-duration-base in .ws-music__fade's transition
     } else {
       paint();
     }
@@ -139,12 +140,16 @@ export function createMusicView(callbacks: MusicViewCallbacks): MusicView {
   return { root, canvas, showEmpty, showPlayer, setPlaying, setProgress, setVolumeSlider };
 }
 
-function svg(paths: { d?: string; tag?: string; attrs?: Record<string, string> }[]): SVGSVGElement {
+// Sizes mirror the shared icon scale (core/dom/icons.ts): 18 ("medium") for
+// the primary transport action, 14 ("small") for the secondary skip
+// controls — the same size distinction the rest of the app draws between a
+// standalone icon and an inline/secondary one.
+function svg(paths: { d?: string; tag?: string; attrs?: Record<string, string> }[], size = 18): SVGSVGElement {
   const ns = 'http://www.w3.org/2000/svg';
   const el = document.createElementNS(ns, 'svg');
   el.setAttribute('viewBox', '0 0 24 24');
-  el.setAttribute('width', '16');
-  el.setAttribute('height', '16');
+  el.setAttribute('width', String(size));
+  el.setAttribute('height', String(size));
   el.setAttribute('fill', 'currentColor');
   for (const item of paths) {
     const node = document.createElementNS(ns, item.tag ?? 'path');
@@ -158,6 +163,6 @@ function svg(paths: { d?: string; tag?: string; attrs?: Record<string, string> }
 const playSvg = () => svg([{ d: 'M8 5v14l11-7z' }]);
 const pauseSvg = () => svg([{ d: 'M6 5h4v14H6zM14 5h4v14h-4z' }]);
 const skipSvg = (back: boolean) =>
-  svg([{ d: back ? 'M6 6h2v12H6zM20 6L10 12l10 6z' : 'M16 6h2v12h-2zM4 6l10 6-10 6z' }]);
+  svg([{ d: back ? 'M6 6h2v12H6zM20 6L10 12l10 6z' : 'M16 6h2v12h-2zM4 6l10 6-10 6z' }], 14);
 const musicNoteIcon = () =>
-  svg([{ d: 'M9 18V5l12-2v13' }, { tag: 'circle', attrs: { cx: '6', cy: '18', r: '3' } }, { tag: 'circle', attrs: { cx: '18', cy: '16', r: '3' } }]);
+  svg([{ d: 'M9 18V5l12-2v13' }, { tag: 'circle', attrs: { cx: '6', cy: '18', r: '3' } }, { tag: 'circle', attrs: { cx: '18', cy: '16', r: '3' } }], 24);

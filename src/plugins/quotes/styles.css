@@ -41,7 +41,7 @@
 }
 
 .ws-quotes__fade {
-  transition: opacity 180ms var(--ws-ease-standard), filter 180ms var(--ws-ease-standard);
+  transition: opacity var(--ws-duration-base) var(--ws-ease-standard), filter var(--ws-duration-base) var(--ws-ease-standard);
 }
 
 .ws-quotes__fade.is-fading {

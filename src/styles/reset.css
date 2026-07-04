@@ -60,6 +60,16 @@ ol {
   position: relative;
 }
 
+/* Collapses every CSS transition/animation in the app to effectively
+   instant. Keyed on two conditions that both need to work before JS has
+   even run a single line: the OS-level media query (so a user with system
+   reduced-motion never sees a flash of full motion on load), and — once
+   AnimationEngine boots — the `is-reduced-motion` class it keeps in sync
+   with the in-app "Reduce motion" setting merged with the same system
+   preference. Without the class rule, the in-app toggle would only affect
+   the handful of JS-driven (Web Animations API) transitions and silently
+   do nothing for the CSS transitions/animations that make up the vast
+   majority of the app's motion. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -69,4 +79,13 @@ ol {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+html.is-reduced-motion *,
+html.is-reduced-motion *::before,
+html.is-reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
 }

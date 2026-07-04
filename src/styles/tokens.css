@@ -81,6 +81,16 @@
   --ws-duration-base: 220ms;
   --ws-duration-slow: 420ms;
   --ws-duration-ambient: 4800ms;
+  /* Shared by every effect that eases toward the cursor's position (ambient
+     glow, wallpaper parallax) — deliberately slower than --ws-duration-slow
+     so the lag between cursor and effect reads as atmosphere, not a cursor
+     trail. One named duration means both effects stay in sync instead of
+     drifting apart as hand-picked numbers. */
+  --ws-duration-drift: 900ms;
+  /* Shared by ambience toggle fades (cursor glow, film grain) — slower than
+     --ws-duration-slow because these are atmosphere settling in, not
+     interactive feedback. */
+  --ws-duration-ambient-fade: 600ms;
   --ws-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
   --ws-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
   --ws-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -128,6 +138,11 @@
   /* ---------------------------------------------------------------- */
   /* Spacing scale                                                     */
   /* ---------------------------------------------------------------- */
+  /* Tighter than space-1 — for hairline gaps between stacked items inside a
+     list/grid that already has its own outer padding (nav sidebar, calendar
+     grid, chip row, list widgets). Its own step because nothing on the main
+     scale is small enough without going to zero. */
+  --ws-space-hairline: 2px;
   --ws-space-1: 4px;
   --ws-space-2: 8px;
   --ws-space-3: 12px;

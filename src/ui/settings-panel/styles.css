@@ -67,7 +67,7 @@
 .ws-settings-panel__sidebar {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--ws-space-hairline);
   padding: 0 var(--ws-space-3) var(--ws-space-2);
   overflow-y: auto;
 }

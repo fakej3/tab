@@ -37,6 +37,10 @@ export class CommandPaletteView {
     panel.addEventListener('click', (event) => event.stopPropagation());
 
     this.root = h('div', { class: 'ws-palette-backdrop', onclick: () => this.app.commandPalette.close() }, [panel]);
+    // Fading out via opacity/pointer-events leaves every control inside
+    // still reachable by Tab — `inert` is what actually pulls the palette
+    // out of the tab order and accessibility tree while closed.
+    this.root.inert = true;
 
     this.root.addEventListener('keydown', (event) => this.handleKeydown(event as KeyboardEvent));
   }
@@ -45,6 +49,7 @@ export class CommandPaletteView {
     container.append(this.root);
     this.app.commandPalette.subscribe((open) => {
       this.root.classList.toggle('is-open', open);
+      this.root.inert = !open;
       if (open) {
         this.input.value = '';
         this.activeIndex = 0;

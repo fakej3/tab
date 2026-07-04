@@ -8,11 +8,21 @@
   height: 100%;
   resize: none;
   background: transparent;
-  border: none;
+  /* Transparent (not none) so focus can add color without a layout shift —
+     same accent-border-on-focus treatment every other text input in the
+     app uses (quotes composer, settings fields) instead of the removed
+     native outline. */
+  border: 1px solid transparent;
   outline: none;
+  border-radius: var(--ws-radius-sm);
   color: var(--ws-color-text-primary);
   font-size: var(--ws-text-sm);
   line-height: var(--ws-line-height-base);
+  transition: border-color var(--ws-duration-base) var(--ws-ease-standard);
+}
+
+.ws-notes__textarea:focus {
+  border-color: var(--ws-color-accent);
 }
 
 .ws-notes__textarea[data-font='mono'] {

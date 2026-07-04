@@ -7,7 +7,7 @@
 .ws-bookmarks__list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--ws-space-hairline);
 }
 
 .ws-bookmarks__item {

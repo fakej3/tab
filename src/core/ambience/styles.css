@@ -24,7 +24,7 @@
   will-change: transform;
   filter: blur(40px);
   opacity: 0;
-  transition: transform 900ms var(--ws-ease-standard), opacity 600ms var(--ws-ease-standard);
+  transition: transform var(--ws-duration-drift) var(--ws-ease-standard), opacity var(--ws-duration-ambient-fade) var(--ws-ease-standard);
 }
 
 .ws-ambient-glow.is-active::before {
@@ -42,7 +42,7 @@
   background-size: 140px 140px;
   mix-blend-mode: overlay;
   opacity: 0;
-  transition: opacity 600ms var(--ws-ease-standard);
+  transition: opacity var(--ws-duration-ambient-fade) var(--ws-ease-standard);
 }
 
 .ws-ambient-grain.is-active {
@@ -73,7 +73,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ws-ambient-glow::before {
-    transition: opacity 600ms var(--ws-ease-standard);
+    transition: opacity var(--ws-duration-ambient-fade) var(--ws-ease-standard);
   }
 
   .ws-ambient-grain.is-animated {

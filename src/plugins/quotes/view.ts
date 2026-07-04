@@ -81,7 +81,7 @@ export function createQuoteView(callbacks: QuoteViewCallbacks): QuoteView {
         paint();
         textEl.classList.remove('is-fading');
         authorEl.classList.remove('is-fading');
-      }, 180);
+      }, 220); // must match --ws-duration-base in .ws-quotes__fade's transition
     } else {
       paint();
     }
@@ -95,8 +95,8 @@ function heartIcon(): SVGSVGElement {
   const ns = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(ns, 'svg');
   svg.setAttribute('viewBox', '0 0 24 24');
-  svg.setAttribute('width', '15');
-  svg.setAttribute('height', '15');
+  svg.setAttribute('width', '14');
+  svg.setAttribute('height', '14');
   svg.setAttribute('fill', 'currentColor');
   const path = document.createElementNS(ns, 'path');
   path.setAttribute(

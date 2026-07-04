@@ -74,7 +74,7 @@
 }
 
 .ws-music__fade {
-  transition: opacity 160ms var(--ws-ease-standard), transform 160ms var(--ws-ease-standard);
+  transition: opacity var(--ws-duration-base) var(--ws-ease-standard), transform var(--ws-duration-base) var(--ws-ease-standard);
 }
 
 .ws-music__fade.is-fading {

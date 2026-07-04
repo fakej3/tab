@@ -115,8 +115,11 @@ export class LayoutEngine {
     this.bus.emit('layout:edit-mode', { enabled });
   }
 
-  moveWidget(instanceId: string, x: number, y: number): void {
-    this.mutateActiveWidget(instanceId, (widget, siblings) => {
+  /** Returns false when the move was rejected (would collide with another
+   *  widget) so the caller can give feedback instead of the widget just
+   *  silently not following the cursor. */
+  moveWidget(instanceId: string, x: number, y: number): boolean {
+    return this.mutateActiveWidget(instanceId, (widget, siblings) => {
       const maxRows = 200;
       const candidate = clampRectToGrid({ ...widget, x, y }, this.gridConfig.columns, maxRows);
       if (hasCollision(candidate, siblings)) return widget;
@@ -124,8 +127,9 @@ export class LayoutEngine {
     });
   }
 
-  resizeWidget(instanceId: string, w: number, h: number): void {
-    this.mutateActiveWidget(instanceId, (widget, siblings) => {
+  /** Same rejection semantics as moveWidget — see there. */
+  resizeWidget(instanceId: string, w: number, h: number): boolean {
+    return this.mutateActiveWidget(instanceId, (widget, siblings) => {
       const descriptor = this.widgetDescriptors.get(widget.pluginId);
       const minW = descriptor?.minSize?.w ?? 1;
       const minH = descriptor?.minSize?.h ?? 1;
@@ -149,17 +153,24 @@ export class LayoutEngine {
     this.mutateActiveWidget(instanceId, (widget) => ({ ...widget, hidden: !widget.hidden }));
   }
 
+  /** Returns whether the updater actually changed the widget — false when a
+   *  move/resize was rejected (e.g. a collision), which callers can use to
+   *  give feedback instead of the widget just silently not following the
+   *  cursor with no explanation. */
   private mutateActiveWidget(
     instanceId: string,
     updater: (widget: WidgetLayout, siblings: WidgetLayout[]) => WidgetLayout
-  ): void {
+  ): boolean {
+    let changed = false;
     this.workspaces.set((prev) =>
       prev.map((workspace) => {
         if (workspace.id !== this.activeId.peek()) return workspace;
         const index = workspace.widgets.findIndex((widget) => widget.instanceId === instanceId);
         if (index === -1) return workspace;
         const siblings = workspace.widgets.filter((_, i) => i !== index);
-        const nextWidget = updater(workspace.widgets[index]!, siblings);
+        const original = workspace.widgets[index]!;
+        const nextWidget = updater(original, siblings);
+        changed = nextWidget !== original;
         const widgets = [...workspace.widgets];
         widgets[index] = nextWidget;
         return { ...workspace, widgets };
@@ -167,6 +178,7 @@ export class LayoutEngine {
     );
     this.persist();
     this.bus.emit('layout:changed', { workspaceId: this.activeId.peek() });
+    return changed;
   }
 
   exportLayouts(): string {
